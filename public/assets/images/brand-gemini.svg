@@ -1,15 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Gemini">
-  <defs>
-    <linearGradient id="g" x1="18" y1="80" x2="78" y2="14" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7c3aed"/>
-      <stop offset=".48" stop-color="#3b82f6"/>
-      <stop offset="1" stop-color="#22d3ee"/>
-    </linearGradient>
-    <filter id="s" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#2563eb" flood-opacity=".35"/>
-    </filter>
-  </defs>
-  <rect width="96" height="96" rx="24" fill="#08111f"/>
-  <path filter="url(#s)" fill="url(#g)" d="M49 9c5 21 17 33 38 38-21 5-33 17-38 40-5-23-17-35-40-40 23-5 35-17 40-38Z"/>
-  <path fill="#fff" fill-opacity=".78" d="M49 27c3 10 9 16 19 20-10 3-16 9-19 20-3-11-9-17-20-20 11-4 17-10 20-20Z"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" aria-label="Gemini" role="img" viewBox="0 0 96 96"><defs><linearGradient id="g" x1="18" x2="78" y1="80" y2="14" gradientUnits="userSpaceOnUse"><stop stop-color="#7c3aed"/><stop offset=".48" stop-color="#3b82f6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><filter id="s" width="160%" height="160%" x="-30%" y="-30%"><feDropShadow dx="0" dy="8" flood-color="#2563eb" flood-opacity=".35" stdDeviation="8"/></filter></defs><rect width="96" height="96" fill="#08111f" rx="24"/><path fill="url(#g)" d="M49 9c5 21 17 33 38 38-21 5-33 17-38 40-5-23-17-35-40-40 23-5 35-17 40-38Z" filter="url(#s)"/><path fill="#fff" fill-opacity=".78" d="M49 27c3 10 9 16 19 20-10 3-16 9-19 20-3-11-9-17-20-20 11-4 17-10 20-20Z"/></svg>
