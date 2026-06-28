@@ -1,0 +1,32 @@
+# GetOTTs
+
+> The world's most trusted OTT subscription marketplace. Cheaper plans, instant delivery, real support.
+
+GetOTTs provides premium shared and personal OTT subscriptions (Streaming, Music, AI Tools, VPNs) at highly discounted rates. We serve customers globally and natively support dynamic pricing (USD and INR) based on GeoIP detection.
+
+## Site Structure
+- [Home Page](https://getotts.com/)
+- [About Us](https://getotts.com/about)
+- [Contact Us](https://getotts.com/contact)
+- [Track Order](https://getotts.com/order)
+- [Refund Policy](https://getotts.com/refund)
+- [Privacy Policy](https://getotts.com/privacy)
+- [Terms of Service](https://getotts.com/terms)
+
+## Product Categories
+- Streaming (Netflix, Prime Video, Disney+, etc.)
+- Music (Spotify, YouTube Premium, Apple Music)
+- AI Tools (ChatGPT Plus, Claude Pro, Canva Pro)
+- VPN (NordVPN, ExpressVPN)
+- Gift Cards
+
+## Platform Features
+- **Multi-currency System**: Automatic GeoIP detection using Cloudflare Trace to serve prices in USD (International) or INR (India).
+- **Region Locking**: Automated filtering of products based on the user's geographic region.
+- **Delivery**: Instant automated delivery via email and user dashboard.
+- **Payment Methods**: Supports UPI, GPay, PhonePe (India) and Crypto/Binance Pay (International).
+
+## Public API Endpoints
+AI agents and tools can query our live catalog using the following public API:
+- `GET https://api.getotts.com/api/v1/products/catalog`
+  - Returns the complete active product catalog, including variants, pricing (USD/INR), and stock availability in JSON format.

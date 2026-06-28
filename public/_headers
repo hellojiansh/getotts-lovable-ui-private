@@ -1,0 +1,49 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.getotts.com https://auth.getotts.com https://paygate.getotts.com https://wa.getotts.com https://YOUR_SUPABASE_PROJECT_REF.supabase.co wss://YOUR_SUPABASE_PROJECT_REF.supabase.co https://api.country.is https://ipapi.co https://1.1.1.1 https://www.facebook.com https://connect.facebook.net; frame-src https://challenges.cloudflare.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+
+/
+  Cache-Control: no-cache, must-revalidate
+
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+/dashboard*
+  X-Robots-Tag: noindex, noarchive, nosnippet
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+/wallet*
+  X-Robots-Tag: noindex, noarchive, nosnippet
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+/checkout*
+  X-Robots-Tag: noindex, noarchive, nosnippet
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+/order*
+  X-Robots-Tag: noindex, noarchive, nosnippet
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+/login*
+  X-Robots-Tag: noindex, noarchive, nosnippet
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+
+/site.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable

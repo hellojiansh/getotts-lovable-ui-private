@@ -1,0 +1,196 @@
+/* ============================================
+   GetOTTs — Auth Logic (Supabase-powered)
+   Real authentication with email/password.
+   ============================================ */
+
+// Supabase client (loaded via CDN in HTML)
+let supabase = null;
+
+function initSupabase() {
+    if (supabase) return supabase;
+    const C = window.GETOTTS_CONFIG;
+    if (C && C.SUPABASE_URL && C.SUPABASE_ANON_KEY && window.supabase) {
+        supabase = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+    }
+    return supabase;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (window.lucide) lucide.createIcons();
+    
+    // ─── Check localStorage FIRST (WhatsApp login persists here) ───
+    const existingToken = localStorage.getItem('GetOTTs_customer_token');
+    const existingCustomer = localStorage.getItem('GetOTTs_customer');
+    if (existingToken && existingCustomer) {
+        // Already logged in (via WhatsApp or any method) — go to dashboard
+        window.location.href = 'dashboard';
+        return;
+    }
+
+    // ─── Supabase session check (email/password login) ───
+    const sb = initSupabase();
+    if (sb) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
+            localStorage.setItem('GetOTTs_customer_token', session.access_token);
+            localStorage.setItem('GetOTTs_customer', JSON.stringify({
+                email: session.user.email,
+                name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+                id: session.user.id,
+            }));
+            window.location.href = 'dashboard';
+            return;
+        }
+    }
+});
+
+// ---- Validation helpers ----
+function showFieldError(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.borderColor = '#ef4444';
+    let errEl = el.parentElement.querySelector('.field-error');
+    if (!errEl) {
+        errEl = document.createElement('div');
+        errEl.className = 'field-error';
+        errEl.style.cssText = 'color:#ef4444;font-size:.78rem;margin-top:4px;';
+        el.parentElement.appendChild(errEl);
+    }
+    errEl.textContent = msg;
+}
+
+function clearFieldErrors() {
+    document.querySelectorAll('.field-error').forEach(e => e.remove());
+    document.querySelectorAll('input').forEach(e => e.style.borderColor = '');
+}
+
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function showAuthToast(msg, type) {
+    let toast = document.getElementById('authToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'authToast';
+        toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 24px;border-radius:12px;font-size:.9rem;font-weight:500;z-index:9999;transition:transform .3s ease;color:white;max-width:90vw;text-align:center;';
+        document.body.appendChild(toast);
+    }
+    toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+    toast.textContent = msg;
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(100px)';
+    }, type === 'error' ? 12000 : 7000);
+}
+
+async function handleLogin() {
+    clearFieldErrors();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    
+    let valid = true;
+    if (!email || !isValidEmail(email)) {
+        showFieldError('loginEmail', 'Enter a valid email address');
+        valid = false;
+    }
+    if (!password || password.length < 6) {
+        showFieldError('loginPassword', 'Password must be at least 6 characters');
+        valid = false;
+    }
+    if (!valid) return;
+    
+    const btn = document.querySelector('.auth-btn');
+    btn.innerHTML = '<span style="opacity:.7">Logging in...</span>';
+    btn.disabled = true;
+
+    const sb = initSupabase();
+    if (sb) {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+            btn.innerHTML = 'Login';
+            btn.disabled = false;
+            showAuthToast(error.message || 'Login failed', 'error');
+            return;
+        }
+        localStorage.setItem('GetOTTs_customer_token', data.session.access_token);
+        localStorage.setItem('GetOTTs_customer', JSON.stringify({
+            email: data.user.email,
+            name: data.user.user_metadata?.name || email.split('@')[0],
+            id: data.user.id,
+        }));
+        showAuthToast('Welcome back! 🎉', 'success');
+        setTimeout(() => { window.location.href = 'dashboard'; }, 800);
+    } else {
+        // Fallback: local mock (Supabase unavailable)
+        setTimeout(() => {
+            localStorage.setItem('GetOTTs_customer_token', 'local_' + Date.now());
+            localStorage.setItem('GetOTTs_customer', JSON.stringify({ email, name: email.split('@')[0] }));
+            window.location.href = 'dashboard';
+        }, 800);
+    }
+}
+
+async function handleRegister() {
+    clearFieldErrors();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const referral = document.getElementById('regReferral')?.value.trim() || '';
+    
+    let valid = true;
+    if (!name || name.length < 2) { showFieldError('regName', 'Enter your full name'); valid = false; }
+    if (!email || !isValidEmail(email)) { showFieldError('regEmail', 'Enter a valid email'); valid = false; }
+    if (!phone || phone.length < 10) { showFieldError('regPhone', 'Enter a valid phone number'); valid = false; }
+    if (!password || password.length < 6) { showFieldError('regPassword', 'Minimum 6 characters'); valid = false; }
+    if (!valid) return;
+    
+    const btn = document.querySelector('.auth-btn');
+    btn.innerHTML = '<span style="opacity:.7">Creating Account...</span>';
+    btn.disabled = true;
+
+    const sb = initSupabase();
+    if (sb) {
+        const { data, error } = await sb.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { name, phone, referral },
+            },
+        });
+        if (error) {
+            btn.innerHTML = 'Create Account';
+            btn.disabled = false;
+            showAuthToast(error.message || 'Registration failed', 'error');
+            return;
+        }
+        // If email confirmation is required
+        if (data.user && !data.session) {
+            showAuthToast('Check your email to confirm your account! 📧', 'success');
+            btn.innerHTML = 'Create Account';
+            btn.disabled = false;
+            return;
+        }
+        // Auto-login
+        if (data.session) {
+            localStorage.setItem('GetOTTs_customer_token', data.session.access_token);
+            localStorage.setItem('GetOTTs_customer', JSON.stringify({
+                email: data.user.email,
+                name,
+                phone,
+                id: data.user.id,
+            }));
+            showAuthToast('Account created! 🎉', 'success');
+            setTimeout(() => { window.location.href = 'dashboard'; }, 800);
+        }
+    } else {
+        // Fallback
+        setTimeout(() => {
+            localStorage.setItem('GetOTTs_customer_token', 'local_' + Date.now());
+            localStorage.setItem('GetOTTs_customer', JSON.stringify({ email, name, phone }));
+            showAuthToast('Account created! 🎉', 'success');
+            setTimeout(() => { window.location.href = 'dashboard'; }, 800);
+        }, 800);
+    }
+}

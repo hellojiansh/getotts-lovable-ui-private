@@ -1,0 +1,5 @@
+Contact: mailto:support@getotts.com
+Preferred-Languages: en
+Canonical: https://getotts.com/.well-known/security.txt
+Policy: https://getotts.com/terms
+Expires: 2027-05-19T00:00:00Z

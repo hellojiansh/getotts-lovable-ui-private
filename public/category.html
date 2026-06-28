@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/tracking.js?v=20260612-meta878" defer></script>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Browse Products - GetOTTs | Cheapest OTT Plans India</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="description" id="pageMeta" content="Browse cheap OTT subscriptions by category. Netflix, Spotify, ChatGPT, VPN and more at up to 80% off. Instant delivery. Trusted by 1000+ customers.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" id="pageCanonical" href="https://getotts.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GetOTTs">
+    <meta property="og:title" id="pageOgTitle" content="Browse Premium Subscriptions - GetOTTs">
+    <meta property="og:description" id="pageOgDesc" content="Browse premium OTT, music, AI, VPN and gift card deals with instant delivery.">
+    <meta property="og:url" id="pageOgUrl" content="https://getotts.com/">
+    <meta property="og:image" id="pageOgImage" content="https://getotts.com/assets/images/ott-tile-bg-ai-blue-optimized.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="pageTwitterTitle" content="Browse Premium Subscriptions - GetOTTs">
+    <meta name="twitter:description" id="pageTwitterDesc" content="Browse premium subscriptions at Indian prices with GetOTTs.">
+    <meta name="twitter:image" id="pageTwitterImage" content="https://getotts.com/assets/images/ott-tile-bg-ai-blue-optimized.webp">
+    <script id="categorySchema" type="application/ld+json">{}</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://api.getotts.com">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/js/lucide-lite.js?v=20260519-lite1"></script>
+    <link rel="stylesheet" href="/css/styles.css?v=20260602-productvariant1">
+    <link rel="stylesheet" href="/css/toast.css?v=1.0">
+    <link rel="stylesheet" href="/css/contrast-fix.css?v=20260512-headericon1">
+    <link rel="stylesheet" href="/css/premium-pages.css?v=20260512-headericon1">
+    <link rel="stylesheet" href="/css/performance-polish.css?v=20260515-trusticons1">
+    <link rel="stylesheet" href="/css/motion-polish.css?v=20260602-motion4">
+    <style>
+        .category-hero {
+            background: var(--black);
+            padding: 100px 0 64px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cat-bg-image {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.35;
+            z-index: 1;
+            filter: blur(4px) saturate(1.5);
+            transition: background-image 0.5s ease;
+        }
+        .cat-bg-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% -20%, var(--cat-color-alpha, rgba(255,255,255,0.1)), rgba(5,5,5,0.85) 70%);
+            z-index: 2;
+        }
+        .cat-hero-icon-box {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            border-radius: 24px;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px var(--cat-color-shadow, rgba(0,0,0,0.3));
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+        .cat-hero-icon-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--cat-color, #fff), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .cat-hero-icon-box svg {
+            width: 40px; height: 40px;
+            color: var(--cat-color, white);
+            filter: drop-shadow(0 0 12px var(--cat-color, rgba(255,255,255,0.5)));
+        }
+
+        .category-body { padding: 48px 0 80px; }
+        .category-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; }
+        .category-toolbar h2 { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 700; }
+        .category-count { font-size: 0.85rem; color: var(--gray-500); background: var(--gray-50); padding: 6px 14px; border-radius: 100px; border: 1px solid var(--gray-100); }
+
+        @media (max-width: 768px) {
+            .category-hero { padding: 60px 0 36px; }
+            .category-hero .cat-hero-icon-box { width: 64px; height: 64px; border-radius: 18px; margin-bottom: 16px; }
+            .category-hero .cat-hero-icon-box::after { border-radius: 18px; }
+            .category-hero .cat-hero-icon-box svg { width: 32px; height: 32px; }
+            .category-hero h1 { font-size: 2.2rem !important; }
+            .category-body { padding: 32px 0 60px; }
+            .category-toolbar { flex-direction: column; align-items: flex-start; }
+            .ag-trust-strip { flex-direction: column; align-items: center; border-radius: 16px !important; }
+            .ag-trust-sep { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N5257L2M" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=878611847969093&ev=PageView&noscript=1" alt="">
+    </noscript>
+
+<!-- HEADER -->
+    <header class="header" id="header">
+        <div class="container header-inner">
+                        <a href="/" class="logo">
+                <img src="/assets/images/logo-upgraded-20260603-small.webp" alt="GetOTTs" style="height:36px; border-radius:10px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));">
+                <span class="logo-name" style="font-size:1.5rem; font-weight:900; letter-spacing:-0.04em;">GetOTTs</span>
+            </a>
+
+            <nav class="main-nav" id="mainNav">
+                <div class="mobile-search-box" id="mobileSearchBox">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="mobileSearchInput" placeholder="Search platforms...">
+                    <div class="search-dropdown" id="mobileSearchDropdown"></div>
+                </div>
+                <a href="/" class="main-nav-link">Home</a>
+                <a href="/category/streaming" class="main-nav-link">Streaming</a>
+                <a href="/category/music" class="main-nav-link">Music</a>
+                <a href="/category/ai-tools" class="main-nav-link">AI Tools</a>
+                <a href="/category/vpn" class="main-nav-link">VPN</a>
+                <a href="/category/gift-cards" class="main-nav-link">Gift Cards</a>
+                <a href="/category/bundles" class="main-nav-link">Bundles</a>
+                <a href="/about" class="main-nav-link">About Us</a>
+                <a href="/blog" class="main-nav-link">Blog</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="search-box" id="searchBox">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="searchInput" placeholder="Search platforms...">
+                    <div class="search-dropdown" id="searchDropdown"></div>
+                </div>
+                <a href="/login" class="header-text-link" id="loginBtn"><i data-lucide="user" class="login-icon"></i><span class="login-text">LOGIN / REGISTER</span></a>
+                <div class="cart-wrapper">
+                    <button class="cart-icon-btn" id="cartBtn">
+                        <i data-lucide="shopping-bag"></i>
+                        <span class="cart-badge" id="cartBadge">0</span>
+                    </button>
+                    <span class="cart-price" id="cartTotal">&#8377;0.00</span>
+                </div>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CATEGORY HERO -->
+    <section class="category-hero" id="categoryHero">
+        <!-- New Background Image -->
+        <div class="cat-bg-image" id="catBgImage"></div>
+        <div class="cat-bg-overlay" id="catBgOverlay"></div>
+        <div class="noise-overlay" style="position:absolute; inset:0; z-index:2; opacity:0.05; background-image:url('data:image/svg+xml;utf8,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E'); pointer-events:none;"></div>
+        
+        <div class="container" style="position:relative; z-index:10; display:flex; flex-direction:column; align-items:center;">
+            
+            <div class="cat-hero-icon-box" id="catIconBox">
+                <i data-lucide="tv-2"></i>
+            </div>
+
+            <!-- Unified Text Card -->
+            <div class="ag-text-card" style="background:transparent; border:none; box-shadow:none; padding:10px 20px; margin-top:0;">
+                <h1 id="catTitle" class="ag-title" style="font-size:3rem; text-shadow: 0 4px 20px rgba(0,0,0,0.5);">Streaming Platforms</h1>
+                <p id="catDesc" class="ag-subtitle" style="font-size:1.15rem; max-width:600px; margin:0 auto; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"><span id="catProducts">7</span> Services, One Payment - Your all-access pass, instantly delivered.</p>
+            </div>
+
+            <!-- Trust Strip -->
+            <div class="ag-trust-strip" style="background: rgba(20,20,20,0.6); padding: 12px 24px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); margin-top: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div class="ag-trust-item">
+                    <i data-lucide="users" style="width:16px;height:16px; color:var(--cat-color, #10b981);"></i>
+                    <span style="color:white;">1,000+ Active Users</span>
+                </div>
+                <div class="ag-trust-sep" style="color:rgba(255,255,255,0.3);">|</div>
+                <div class="ag-trust-item">
+                    <i data-lucide="shield-check" style="width:16px;height:16px; color:var(--cat-color, #10b981);"></i>
+                    <span style="color:white;">Verified Payments</span>
+                </div>
+                <div class="ag-trust-sep" style="color:rgba(255,255,255,0.3);">|</div>
+                <div class="ag-trust-item">
+                    <i data-lucide="star" style="width:16px;height:16px; color:var(--cat-color, #10b981);"></i>
+                    <span style="color:white;">Buyer Reviewed</span>
+                </div>
+            </div>
+
+            <!-- Category Nav Pills -->
+            <div class="cat-nav-pills" id="catNavPills" style="margin-top: 32px !important;">
+                <a href="/category/streaming" class="cat-nav-pill" data-cat="streaming"><i data-lucide="tv-2"></i> Streaming</a>
+                <a href="/category/music" class="cat-nav-pill" data-cat="music"><i data-lucide="music-2"></i> Music</a>
+                <a href="/category/ai-tools" class="cat-nav-pill" data-cat="ai"><i data-lucide="cpu"></i> AI Tools</a>
+                <a href="/category/vpn" class="cat-nav-pill" data-cat="vpn"><i data-lucide="shield-check"></i> VPN</a>
+                <a href="/category/gift-cards" class="cat-nav-pill" data-cat="gift-cards"><i data-lucide="gift"></i> Gift Cards</a>
+                <a href="/category/bundles" class="cat-nav-pill" data-cat="bundles"><i data-lucide="layers-3"></i> Bundles</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRODUCTS GRID -->
+    <section class="category-body">
+        <div class="container">
+            <div class="category-toolbar">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <h2 id="gridTitle">All Products</h2>
+                    <span class="category-count" id="gridCount">0 products</span>
+                </div>
+            </div>
+            <div class="product-row" id="streamingGrid" data-category="streaming"></div>
+            <div class="product-row" id="musicGrid" data-category="music"></div>
+            <div class="product-row" id="aiGrid" data-category="ai"></div>
+            <div class="product-row" id="vpnGrid" data-category="vpn"></div>
+            <div class="product-row" id="giftCardsGrid" data-category="gift-cards"></div>
+            <div class="product-row" id="bundlesGrid" data-category="bundles"></div>
+        </div>
+    </section>
+
+    <!-- TRUST BAR -->
+    <section class="trust-bar">
+        <div class="container trust-bar-inner">
+            <div class="trust-badge-item">
+                <div class="tbi-icon"><i data-lucide="zap"></i></div>
+                <div><strong>FAST DELIVERY</strong><span>Credentials delivered instantly</span></div>
+            </div>
+            <div class="trust-badge-item">
+                <div class="tbi-icon"><i data-lucide="shield-check"></i></div>
+                <div><strong>SAFE & SECURE</strong><span>100% encrypted payments</span></div>
+            </div>
+            <div class="trust-badge-item">
+                <div class="tbi-icon"><i data-lucide="message-circle"></i></div>
+                <div><strong>LIVE SUPPORT</strong><span>24/7 WhatsApp support</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col brand-col">
+                            <a href="/" class="logo">
+                <img src="/assets/images/logo-upgraded-20260603-small.webp" alt="GetOTTs" style="height:36px; border-radius:10px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));">
+                <span class="logo-name" style="font-size:1.5rem; font-weight:900; letter-spacing:-0.04em;">GetOTTs</span>
+            </a>
+                <p>The world's most trusted OTT subscription marketplace. Cheaper plans, instant delivery, real support.</p>
+                <div class="social-row">
+    <a href="https://instagram.com/getotts" target="_blank" aria-label="Instagram" class="social-icon-btn instagram">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+    </a>
+    <a href="https://t.me/getotts" target="_blank" aria-label="Telegram" class="social-icon-btn telegram">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="none">
+            <path d="M21.2 4.4 2.4 10.5c-.6.2-.6 1.1 0 1.3l4.5 1.5 1.7 5.3c.1.4.6.6 1 .3l2.5-2 4.3 3.2c.5.3 1.1 0 1.2-.5L21.8 5.5c.2-.7-.4-1.3-1-.9z"/>
+        </svg>
+    </a>
+    <a href="https://wa.me/919088212294" target="_blank" aria-label="WhatsApp" class="social-icon-btn whatsapp">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="none">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+    </a>
+</div>
+            </div>
+            <div class="footer-links-grid">
+            <div class="footer-col">
+                <h4>Browse</h4>
+                <a href="/category/streaming">Streaming</a>
+                <a href="/category/music">Music</a>
+                <a href="/category/ai-tools">AI Tools</a>
+                <a href="/category/vpn">VPN</a>
+                <a href="/category/gift-cards">Gift Cards</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="/about">About Us</a>
+                <a href="/contact">Contact Us</a>
+                <a href="https://wa.me/919088212294?text=I%20want%20to%20become%20an%20affiliate">Affiliates</a>
+                <a href="/order">Track Order</a>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <a href="https://wa.me/919088212294">WhatsApp Support</a>
+                <a href="/refund">Refund Policy</a>
+                <a href="/terms">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+            </div>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 GetOTTs - All Rights Reserved</p>
+            <div class="footer-pays">
+                <span>UPI</span><span>GPay</span><span>PhonePe</span><span>Crypto</span><span>Binance Pay</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/919088212294?text=Hi%20GetOTTs!" class="wa-float" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span class="wa-float-label">Chat with us</span>
+    </a>
+
+    <!-- CART DRAWER -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <aside class="cart-drawer" id="cartDrawer">
+        <div class="cart-drawer-header">
+            <h3>Your Cart</h3>
+            <button class="cart-close" onclick="closeCart()">&times;</button>
+        </div>
+        <div class="cart-drawer-body" id="cartDrawerBody"></div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter" style="display:none;">
+            <div class="cart-total-row"><span>Total:</span><strong id="cartTotal">&#8377;0</strong></div>
+            <button class="btn btn-primary w-full" onclick="checkoutCart()">Secure Checkout</button>
+        </div>
+    </aside>
+
+    <script src="/js/mobile-menu.js?v=20260602-mobilemenu1"></script>
+    <script src="/js/data.js?v=20260615-localimages1"></script>
+    <script src="/js/app.js?v=20260615-localimages1"></script>
+    <script src="/js/toast.js?v=20260515-longtoast2"></script>
+    <script>
+    (function() {
+        var path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase().replace(/^category\//, '');
+        var categories = {
+            'streaming': { icon: 'tv-2', color: '#FF3366', colorAlpha: 'rgba(255,51,102,0.15)', colorShadow: 'rgba(255,51,102,0.3)', title: 'Streaming Platforms', desc: 'Services, One Payment - Your all-access pass, instantly delivered.', seoTitle: 'Cheap OTT Subscriptions India - GetOTTs', seoDesc: 'Buy cheap OTT subscriptions in India including Netflix, Prime Video, Hotstar, SonyLIV, ZEE5 and Crunchyroll.', dataCat: 'streaming', gridId: 'streamingGrid', bgImage: '/assets/images/ott-tile-bg-ai-blue-optimized.webp' },
+            'music': { icon: 'music-2', color: '#1DB954', colorAlpha: 'rgba(29,185,84,0.15)', colorShadow: 'rgba(29,185,84,0.3)', title: 'Music Platforms', desc: 'Services, One Payment - Ad-free music, offline downloads, premium listening.', seoTitle: 'Cheap Music Subscriptions India - GetOTTs', seoDesc: 'Buy Spotify Premium, YouTube Premium, Apple Music and music subscriptions at low prices with quick delivery and support from GetOTTs.', dataCat: 'music', gridId: 'musicGrid', bgImage: '/assets/images/spotify.webp' },
+            'ai-tools': { icon: 'cpu', color: '#7C3AED', colorAlpha: 'rgba(124,58,237,0.15)', colorShadow: 'rgba(124,58,237,0.3)', title: 'AI Tools', desc: 'GPT-4, Claude, Canva Pro & more - Premium AI at Indian prices.', seoTitle: 'Cheap AI Tool Subscriptions India - ChatGPT, Canva, Perplexity | GetOTTs', seoDesc: 'Get ChatGPT Plus, Canva, Perplexity, Gemini and other AI tool subscriptions at Indian prices with manual delivery support.', dataCat: 'ai', gridId: 'aiGrid', bgImage: '/assets/images/hero-reference-cinematic-v3.webp' },
+            'vpn': { icon: 'shield-check', color: '#0088CC', colorAlpha: 'rgba(0,136,204,0.15)', colorShadow: 'rgba(0,136,204,0.3)', title: 'VPN Services', desc: 'Privacy, security, stream from anywhere - Premium VPN for less.', seoTitle: 'Cheap VPN Subscriptions India - NordVPN Deals | GetOTTs', seoDesc: 'Buy VPN subscriptions such as NordVPN at lower prices with replacement support and secure checkout from GetOTTs.', dataCat: 'vpn', gridId: 'vpnGrid', bgImage: '/assets/images/hero-cinematic-v2.webp' },
+            'gift-cards': { icon: 'gift', color: '#F59E0B', colorAlpha: 'rgba(245,158,11,0.15)', colorShadow: 'rgba(245,158,11,0.3)', title: 'Gift Cards', desc: 'Digital gift cards & vouchers - Instant code delivery.', seoTitle: 'Digital Gift Cards India - Instant Gift Card Deals | GetOTTs', seoDesc: 'Browse digital gift cards and voucher deals from GetOTTs with instant code delivery and secure checkout.', dataCat: 'gift-cards', gridId: 'giftCardsGrid', bgImage: '/assets/images/hero.webp' },
+            'bundles': { icon: 'layers-3', color: '#0EA5E9', colorAlpha: 'rgba(14,165,233,0.15)', colorShadow: 'rgba(14,165,233,0.3)', title: 'Bundles', desc: 'Curated subscription combos - More access, one lower total.', seoTitle: 'Subscription Bundles India - Save on OTT, Music and AI | GetOTTs', seoDesc: 'Save more with GetOTTs subscription bundles across streaming, music, VPN and AI tools.', dataCat: 'bundles', gridId: 'bundlesGrid', bgImage: '/assets/images/ott-tile-bg-ai-blue-optimized.webp' }
+        };
+        var cat = categories[path] || categories['streaming'];
+
+        function updateCategoryUI() {
+            // Apply CSS variables and background image to hero
+            const hero = document.getElementById('categoryHero');
+            if (hero) {
+                hero.style.setProperty('--cat-color', cat.color);
+                hero.style.setProperty('--cat-color-alpha', cat.colorAlpha);
+                hero.style.setProperty('--cat-color-shadow', cat.colorShadow);
+            }
+            
+            const bgImage = document.getElementById('catBgImage');
+            if (bgImage) {
+                bgImage.style.backgroundImage = 'url(' + cat.bgImage + ')';
+            }
+
+            // Update Icon
+            const iconBox = document.getElementById('catIconBox');
+            if (iconBox) {
+                iconBox.innerHTML = '<i data-lucide="' + cat.icon + '"></i>';
+            }
+
+            document.getElementById('catTitle').textContent = cat.title;
+            
+            var count = 0;
+            var categoryProducts = [];
+            if (typeof getProductsByCategory === 'function' && (!window.getottsCatalogHasLiveData || window.getottsCatalogHasLiveData())) {
+                categoryProducts = getProductsByCategory(cat.dataCat);
+                count = categoryProducts.length;
+            }
+            
+            // Update counts
+            const countEl = document.getElementById('catProducts');
+            if (countEl) countEl.textContent = count;
+            
+            const gridCountEl = document.getElementById('gridCount');
+            if (gridCountEl) gridCountEl.textContent = count + (count === 1 ? ' product' : ' products');
+
+            // Update subtitle description with dynamic count
+            var descEl = document.getElementById('catDesc');
+            if (descEl) {
+                // Prepend count to the description if it's not already there
+                descEl.innerHTML = '<span id="catProducts" style="color:var(--cat-color); font-weight:700;">' + count + '</span> ' + cat.desc;
+            }
+
+            document.querySelectorAll('.cat-nav-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.cat === cat.dataCat);
+                if (pill.dataset.cat === cat.dataCat) {
+                    pill.style.borderColor = cat.color;
+                    pill.style.backgroundColor = cat.colorAlpha;
+                } else {
+                    pill.style.borderColor = '';
+                    pill.style.backgroundColor = '';
+                }
+            });
+
+            ['streamingGrid', 'musicGrid', 'aiGrid', 'vpnGrid', 'giftCardsGrid', 'bundlesGrid'].forEach(id => {
+                var el = document.getElementById(id);
+                if (el) el.style.display = (id === cat.gridId) ? '' : 'none';
+            });
+
+            if (window.lucide) lucide.createIcons();
+            applyCategorySeo(count, categoryProducts);
+        }
+
+        function setMeta(selector, value) {
+            var el = document.querySelector(selector);
+            if (el && value) el.setAttribute('content', value);
+        }
+
+        function applyCategorySeo(count, products) {
+            var canonical = 'https://getotts.com/category/' + path;
+            document.title = cat.seoTitle;
+            setMeta('meta[name="description"]', cat.seoDesc);
+            var canonicalEl = document.getElementById('pageCanonical');
+            if (canonicalEl) canonicalEl.href = canonical;
+            setMeta('#pageOgTitle', cat.seoTitle);
+            setMeta('#pageOgDesc', cat.seoDesc);
+            setMeta('#pageOgUrl', canonical);
+            setMeta('#pageOgImage', 'https://getotts.com' + cat.bgImage);
+            setMeta('#pageTwitterTitle', cat.seoTitle);
+            setMeta('#pageTwitterDesc', cat.seoDesc);
+            setMeta('#pageTwitterImage', 'https://getotts.com' + cat.bgImage);
+
+            var schemaEl = document.getElementById('categorySchema');
+            if (schemaEl) {
+                schemaEl.textContent = JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'CollectionPage',
+                    name: cat.title + ' - GetOTTs',
+                    description: cat.seoDesc,
+                    url: canonical,
+                    mainEntity: {
+                        '@type': 'ItemList',
+                        numberOfItems: count,
+                        itemListElement: (products || []).slice(0, 12).map(function(product, index) {
+                            return {
+                                '@type': 'ListItem',
+                                position: index + 1,
+                                name: product.name,
+                                url: 'https://getotts.com/product/' + (product.slug || product.id)
+                            };
+                        })
+                    }
+                });
+            }
+        }
+
+        // Initial render (uses fallback data)
+        updateCategoryUI();
+
+        // Listen for live catalog updates from the database
+        window.addEventListener('catalogUpdated', updateCategoryUI);
+
+    })();
+    </script>
+</body>
+</html>

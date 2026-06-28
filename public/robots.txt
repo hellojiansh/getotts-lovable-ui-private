@@ -1,0 +1,39 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://getotts.com/sitemap.xml
+
+# Main Pages
+Allow: /category/streaming
+Allow: /category/music
+Allow: /category/ai-tools
+Allow: /category/vpn
+Allow: /category/gift-cards
+Allow: /product/
+Allow: /about
+Allow: /contact
+Allow: /how-to-use
+Allow: /terms
+Allow: /refund
+Allow: /privacy
+
+# Block admin and internal
+Disallow: /admin
+Disallow: /admin/
+Disallow: /adminno881
+Disallow: /adminno881/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /checkout
+Disallow: /checkout/
+Disallow: /order
+Disallow: /order.html
+Disallow: /api/
+Disallow: /private/
+Disallow: /static/
+Disallow: /js/
+Disallow: /css/
+
+# Block crawl of non-content URLs
+Disallow: /*.json$

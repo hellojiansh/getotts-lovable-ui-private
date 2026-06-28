@@ -1,0 +1,16 @@
+/* Small post-polish storefront fixes that must load after performance-polish.css. */
+body:has(.product-page-main) .stars,
+body:has(.product-page-main) .rating-stars,
+body:has(.product-page-main) .product-review-stars,
+body:has(.product-page-main) .product-review-stars * {
+    color: #fbbf24 !important;
+    -webkit-text-fill-color: #fbbf24 !important;
+    text-shadow: 0 0 14px rgba(251, 191, 36, 0.28) !important;
+    opacity: 1 !important;
+}
+
+body:has(.product-page-main) .p-rating .stars {
+    display: inline-flex !important;
+    min-width: 78px !important;
+    letter-spacing: 1px !important;
+}

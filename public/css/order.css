@@ -1,0 +1,94 @@
+.ck-header{background:white;border-bottom:1px solid var(--gray-100)}.ck-header-inner{display:flex;align-items:center;justify-content:space-between;height:60px}.order-main{padding:32px 0 64px;min-height:calc(100vh - 60px);background:linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.96) 220px),var(--bg-dark)}.order-search{text-align:center;max-width:480px;margin:0 auto;padding:60px 0}.order-search h1{font-family:var(--font-heading);font-size:2rem;font-weight:800;color:var(--gray-800);margin-bottom:8px}.order-search p{color:var(--gray-500);font-size:.95rem;margin-bottom:28px}.order-search-box{display:flex;gap:10px}.order-search-box input{flex:1;padding:13px 18px;border:2px solid var(--gray-200);border-radius:var(--radius);font-size:1.05rem;font-family:monospace;text-transform:uppercase;text-align:center;letter-spacing:2px;color:var(--gray-800);background:white;transition:border-color .2s}.order-search-box input:focus{outline:none;border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(16,185,129,.1)}.order-search-box input::placeholder{color:var(--gray-300);letter-spacing:2px}.order-banner{display:flex;align-items:center;gap:14px;padding:18px 22px;border-radius:8px;margin-bottom:18px;box-shadow:0 16px 42px rgba(0,0,0,0.18)}.order-banner.pending{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fbbf24}.order-banner.paid{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:1px solid var(--accent-light)}.order-banner.delivered{background:linear-gradient(135deg,#d1fae5,#ecfdf5);border:1px solid var(--green-300)}.order-banner.failed{background:linear-gradient(135deg,#fee2e2,#fecaca);border:1px solid #f87171}.order-banner.action-required{background:linear-gradient(135deg,rgba(251,146,60,0.18),rgba(14,165,233,0.08));border:1px solid rgba(251,146,60,0.55)}.order-banner-icon{width:42px;height:42px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#fed7aa;background:rgba(255,255,255,0.08)}.order-banner-icon svg{width:22px;height:22px}.order-banner-text h2{font-family:var(--font-heading);font-size:1rem;font-weight:800;color:#f8fafc}.order-banner-text p{font-size:.84rem;color:#cbd5e1;margin-top:2px}.order-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.order-card{background:linear-gradient(180deg,rgba(15,23,42,0.88),rgba(10,18,32,0.94));border:1px solid rgba(148,163,184,0.22);border-radius:8px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,0.18)}.order-card h3{font-family:var(--font-heading);font-weight:800;font-size:1rem;color:#f8fafc;margin-bottom:16px}.order-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(148,163,184,0.12);font-size:.88rem}.order-row span{color:#94a3b8}.order-row strong{color:#f8fafc}.order-status-pill{padding:4px 11px;border-radius:var(--radius-full);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0}.order-status-pill.pending{background:#fef3c7;color:#92400e}.order-status-pill.paid,.order-status-pill.delivered{background:rgba(34,197,94,0.16);color:#86efac}.order-status-pill.action_required{background:rgba(251,146,60,0.16);color:#fdba74}.order-status-pill.failed{background:#fee2e2;color:#991b1b}.cred-card{border-color:var(--green-300);background:var(--blue-50)}.cred-warn{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--warning);margin-bottom:16px;font-weight:500}.cred-warn svg{width:14px;height:14px}.cred-field{margin-bottom:14px}.cred-field label{display:block;font-size:.78rem;font-weight:600;color:var(--gray-500);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}.cred-copy-row{display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px 14px}.cred-copy-row code{flex:1;font-size:.95rem;font-weight:600;color:var(--gray-800);word-break:break-all}.copy-btn{padding:4px;border-radius:6px;transition:background .15s}.copy-btn:hover{background:var(--gray-100)}.copy-btn svg{width:16px;height:16px;color:var(--gray-400)}.pending-card{text-align:center;padding:26px 22px}.pending-icon{width:44px;height:44px;margin:0 auto 12px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:rgba(37,99,235,0.14);color:#93c5fd}.pending-icon svg{width:22px;height:22px}.pending-card h3{margin-bottom:10px}.pending-card p{font-size:.88rem;color:#cbd5e1;margin-bottom:20px;line-height:1.6}.timeline-card{margin-bottom:20px}.timeline{position:relative;padding-left:24px}.timeline::before{content:'';position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:rgba(148,163,184,0.22)}.tl-item{position:relative;padding:8px 0 20px 24px}.tl-dot{position:absolute;left:-24px;top:12px;width:16px;height:16px;border-radius:50%;background:rgba(148,163,184,0.28);border:3px solid #0f172a;box-shadow:0 0 0 2px rgba(148,163,184,0.22)}.tl-item.done .tl-dot{background:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,0.32)}.tl-item.active .tl-dot{background:var(--warning);box-shadow:0 0 0 2px #fde68a;animation:pulse 2s ease-in-out infinite}@keyframes pulse{0%,100%{box-shadow:0 0 0 2px #fde68a}50%{box-shadow:0 0 0 6px rgba(251,191,36,.2)}}.tl-content strong{display:block;font-size:.88rem;color:#f8fafc}.tl-content span{font-size:.78rem;color:#94a3b8}.help-card{margin-top:18px!important}.help-card p{font-size:.88rem;color:#94a3b8;margin-bottom:16px}.help-actions{display:flex;gap:10px;flex-wrap:wrap}.order-notfound{text-align:center;padding:80px 0}.notfound-icon{font-size:3rem;margin-bottom:16px}.order-notfound h2{font-family:var(--font-heading);font-size:1.3rem;font-weight:700;color:#f8fafc;margin-bottom:8px}.order-notfound p{color:#94a3b8;font-size:.9rem;margin-bottom:24px}@media (max-width:900px){.order-info-grid{grid-template-columns:1fr}}@media (max-width:600px){.order-main{padding:20px 0 48px}.order-banner{padding:16px;align-items:flex-start}.order-card{padding:18px}.order-row{align-items:flex-start;gap:16px}.pending-card{padding:22px 16px}.help-card{padding:16px}.help-actions{flex-direction:column;width:100%}.help-actions .btn{width:100%;text-align:center;justify-content:center}}@media (max-width:600px){.order-search-box{flex-direction:column}.order-search h1{font-size:1.5rem}}body:has(.order-main) .order-main .order-card{background:linear-gradient(180deg,rgba(15,23,42,0.9),rgba(10,18,32,0.96))!important;border:1px solid rgba(148,163,184,0.22)!important;border-radius:8px!important;color:#f8fafc!important;-webkit-text-fill-color:initial!important}body:has(.order-main) .order-main .order-card h1,body:has(.order-main) .order-main .order-card h2,body:has(.order-main) .order-main .order-card h3,body:has(.order-main) .order-main .order-card strong{color:#f8fafc!important;-webkit-text-fill-color:#f8fafc!important}body:has(.order-main) .order-main .order-card p,body:has(.order-main) .order-main .order-card span{color:#94a3b8!important;-webkit-text-fill-color:#94a3b8!important}body:has(.order-main) .order-main .order-status-pill.paid,body:has(.order-main) .order-main .order-status-pill.delivered{background:rgba(34,197,94,0.16)!important;color:#86efac!important;-webkit-text-fill-color:#86efac!important}body:has(.order-main) .order-main .order-status-pill.action_required{background:rgba(251,146,60,0.16)!important;color:#fdba74!important;-webkit-text-fill-color:#fdba74!important}
+/* Order post-purchase guidance and dark-mode readability fixes */
+.order-banner.pending .order-banner-text h2,.order-banner.paid .order-banner-text h2,.order-banner.delivered .order-banner-text h2,.order-banner.failed .order-banner-text h2{color:#0f172a;-webkit-text-fill-color:#0f172a}.order-banner.pending .order-banner-text p,.order-banner.paid .order-banner-text p,.order-banner.delivered .order-banner-text p,.order-banner.failed .order-banner-text p{color:#334155;-webkit-text-fill-color:#334155}.order-howto-card{margin-top:18px}.order-howto-card h3{display:flex;align-items:center;gap:8px}.order-howto-sub{color:#cbd5e1!important;-webkit-text-fill-color:#cbd5e1!important;margin-bottom:14px}.order-howto-steps{display:grid;gap:10px;margin:0;padding:0;list-style:none;counter-reset:orderHowTo}.order-howto-steps li{counter-increment:orderHowTo;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;color:#e5edf7;line-height:1.55;font-size:.9rem}.order-howto-steps li::before{content:counter(orderHowTo);width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:#1d4ed8;color:white;font-weight:800;font-size:.8rem;box-shadow:0 0 0 1px rgba(96,165,250,.35)}.order-howto-note{margin-top:14px;padding:12px 14px;border-radius:8px;background:rgba(59,130,246,.12);border:1px solid rgba(96,165,250,.28);color:#bfdbfe!important;-webkit-text-fill-color:#bfdbfe!important;font-size:.84rem;line-height:1.5}.cred-card .cred-warn,.cred-card .cred-field label{color:#cbd5e1!important;-webkit-text-fill-color:#cbd5e1!important}.cred-card .cred-copy-row{background:#f8fafc!important;border-color:#dbe7f5!important}.cred-card .cred-copy-row code{color:#0f172a!important;-webkit-text-fill-color:#0f172a!important}.cred-card .copy-btn svg{color:#1e293b!important}
+
+/* Final order how-to readability layer */
+body:has(.order-main) .order-main .order-howto-card {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(10, 18, 32, 0.98)) !important;
+    border-color: rgba(96, 165, 250, 0.26) !important;
+    color: #e5edf7 !important;
+    -webkit-text-fill-color: initial !important;
+    overflow: hidden !important;
+}
+
+body:has(.order-main) .order-main .order-howto-card * {
+    -webkit-text-fill-color: currentColor !important;
+}
+
+body:has(.order-main) .order-main .order-howto-card h3 {
+    color: #f8fbff !important;
+    margin-bottom: 14px !important;
+}
+
+body:has(.order-main) .order-main .order-howto-card h3 svg {
+    width: 19px !important;
+    height: 19px !important;
+    color: #93c5fd !important;
+    stroke: currentColor !important;
+    opacity: 1 !important;
+    flex: 0 0 auto !important;
+}
+
+body:has(.order-main) .order-main .order-howto-sub {
+    color: #b7c7dd !important;
+    margin-bottom: 16px !important;
+    max-width: 100% !important;
+    line-height: 1.55 !important;
+    overflow-wrap: anywhere !important;
+}
+
+body:has(.order-main) .order-main .order-howto-steps {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+body:has(.order-main) .order-main .order-howto-steps li {
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    color: #e9f1ff !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+}
+
+body:has(.order-main) .order-main .order-howto-steps li::before {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, #2563eb, #1d7dff) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+body:has(.order-main) .order-main .order-howto-note {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    color: #bfdbfe !important;
+    background: rgba(59, 130, 246, 0.13) !important;
+    border-color: rgba(96, 165, 250, 0.34) !important;
+    overflow-wrap: anywhere !important;
+}
+
+body:has(.order-main) .order-main .order-card p.order-howto-sub,
+body:has(.order-main) .order-main #orderHowToSub {
+    color: #b7c7dd !important;
+    -webkit-text-fill-color: #b7c7dd !important;
+}
+
+body:has(.order-main) .order-main .order-card p.order-howto-note,
+body:has(.order-main) .order-main #orderHowToNote {
+    color: #bfdbfe !important;
+    -webkit-text-fill-color: #bfdbfe !important;
+}
+
+@media (max-width: 560px) {
+    body:has(.order-main) .order-main .order-howto-card {
+        padding: 18px !important;
+    }
+
+    body:has(.order-main) .order-main .order-howto-sub,
+    body:has(.order-main) .order-main .order-howto-steps li,
+    body:has(.order-main) .order-main .order-howto-note {
+        font-size: 0.86rem !important;
+    }
+}

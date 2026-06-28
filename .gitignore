@@ -1,0 +1,36 @@
+# Dependencies and local tooling
+node_modules/
+.netlify/
+.lovable/
+.vercel/
+
+# Private config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*PRIVATE*
+*private*
+
+# Build/test/cache output
+dist/
+build/
+coverage/
+.cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# Archives and local captures
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.har
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

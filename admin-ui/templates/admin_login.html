@@ -1,0 +1,98 @@
+﻿ï»¿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+    <title>Admin Login &mdash; GetOTTs</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/assets/images/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/images/apple-touch-icon.png">
+    {% if turnstile_enabled %}
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    {% endif %}
+
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a211c; color: white; margin: 0; }
+        form { background: #222; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 320px; }
+        .admin-logo { display: block; width: 58px; height: 58px; border-radius: 14px; object-fit: cover; margin: 0 auto 16px; box-shadow: 0 12px 30px rgba(16,185,129,0.18); }
+        h2 { margin-top: 0; margin-bottom: 20px; font-weight: 600; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #333; background: #111; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #10b981; border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background: #059669; }
+        button:disabled { background: #6b7280; cursor: not-allowed; }
+        .footer { margin-top: 20px; font-size: 0.8rem; color: #666; text-align: center; }
+        .footer a { color: #10b981; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <form id="lform">
+        <img src="/static/assets/images/logo-upgraded-20260603.png" alt="GetOTTs" class="admin-logo">
+        <h2>Secure Login</h2>
+        <input type="hidden" id="csrfToken" value="{{ csrf_token }}">
+        <input type="password" id="pwd" placeholder="Password" required autofocus>
+        {% if turnstile_enabled %}
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" style="margin: 10px 0;"></div>
+        {% endif %}
+
+        <button type="submit" id="submitBtn">Verify Access</button>
+        <div class="footer">
+            <a href="/">Return to Store</a>
+        </div>
+    </form>
+    <script>
+        // Admin is served by the API host, so authenticate on the same origin
+        // to ensure the secure admin cookies are set for this dashboard.
+        let API_BASE = `${window.location.origin}/api/v1/`;
+        if (!API_BASE.endsWith('/')) API_BASE += '/';
+
+
+
+        const safeNextUrl = {{ next | tojson }};
+
+        document.getElementById('lform').onsubmit = async (e) => {
+            e.preventDefault();
+            const p = document.getElementById('pwd').value;
+            const btn = document.getElementById('submitBtn');
+            const csrfToken = document.getElementById('csrfToken')?.value || '';
+            const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value || '';
+            
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+            try {
+                const res = await fetch(`${API_BASE}admin/auth`, {
+                    method: 'POST', 
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    }, 
+                    body: JSON.stringify({
+                        password: p,
+                        csrf_token: csrfToken,
+                        cf_turnstile_response: turnstileToken
+                    }) 
+                });
+                
+                if(res.ok) {
+                    window.location.href = safeNextUrl;
+                } else {
+                    const data = await res.json();
+                    let errMsg = "Login failed";
+                    if (res.status === 401) errMsg = "Invalid admin password.";
+                    else if (res.status === 429) errMsg = "Too many attempts. Please wait and try again.";
+                    else errMsg = data.detail || data.message || "Login failed";
+                    alert(errMsg);
+                }
+            } catch(err) {
+                console.error(err);
+                alert(err?.message || JSON.stringify(err) || "Network error. Please check your connection to the API.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify Access';
+            }
+        }
+    </script>
+    <script src="/static/js/grammar-assist.js?v=20260518-writing1" defer></script>
+</body>
+</html>
+

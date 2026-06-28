@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/tracking.js?v=20260612-meta878" defer></script>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - GetOTTs</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="description" content="Complete your GetOTTs purchase securely. UPI, Crypto, and Binance Pay accepted.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/js/lucide-lite.js?v=20260519-lite1"></script>
+    <link rel="stylesheet" href="/css/styles.css?v=20260430-05">
+    <link rel="stylesheet" href="/css/toast.css?v=1.0">
+    <link rel="stylesheet" href="/css/contrast-fix.css?v=20260512-headericon1">
+    <link rel="stylesheet" href="/css/premium-pages.css?v=20260512-headericon1">
+    <link rel="stylesheet" href="/css/checkout-premium.css?v=20260519-walletsuccess1">
+    <link rel="stylesheet" href="/css/motion-polish.css?v=20260604-flowmotion1">
+    <script src="/js/toast.js?v=20260515-longtoast2"></script>
+    <script src="/js/config.js?v=20260506-upi1"></script>
+    <script src="/js/data.js?v=20260604-deleteproduct1"></script>
+    <script src="/js/wa-auth.js?v=20260515-waemail2" defer></script>
+    <script src="/js/checkout.js?v=20260604-flowmotion1" defer></script>
+</head>
+<body class="ck-body">
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N5257L2M" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=878611847969093&ev=PageView&noscript=1" alt="">
+    </noscript>
+
+<header class="ck-header">
+        <div class="container ck-header-inner">
+            <a href="/" class="logo">
+                <img src="/assets/images/logo-upgraded-20260603-small.webp" alt="GetOTTs" style="height:36px; border-radius:10px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));">
+                <span class="logo-name" style="font-size:1.6rem; font-weight:900; letter-spacing:-0.04em; background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GetOTTs</span>
+            </a>
+            <div class="ck-steps">
+                <div class="ck-step active"><span>1</span> Details</div>
+                <div class="ck-step"><span>2</span> Payment</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="ck-main">
+        <div class="container ck-grid">
+            
+            <!-- Left: Order Details Form -->
+            <div class="ck-left">
+                <div class="ck-card" id="ckProcessing">
+                    <div class="ck-section-title">
+                        <div class="ck-section-num">1</div>
+                        <h2>Billing Details</h2>
+                    </div>
+
+                    <!-- Auth Required (Email or WhatsApp) -->
+                    <div id="authRequired" class="ck-auth-required" style="display:none;">
+                        <div class="ck-auth-icon">
+                            <i data-lucide="shield-check"></i>
+                        </div>
+                        <h3>Verification Required</h3>
+                        <p>Please log in to your account to continue with the purchase.</p>
+                        
+                        <div id="authOptions">
+                            <button type="button" class="ck-auth-wa" onclick="startWhatsAppAuth()" id="waLoginBtn">
+                                <i data-lucide="message-circle" style="vertical-align:middle; margin-right:8px;"></i> Verify with WhatsApp
+                            </button>
+                            <div class="ck-auth-divider">
+                                <hr style="flex:1; border:0; border-top:1px solid var(--gray-200);"> OR <hr style="flex:1; border:0; border-top:1px solid var(--gray-200);">
+                            </div>
+                            <div id="emailAuthSection">
+                                <input type="email" id="authEmailInput" placeholder="Enter your email" style="width:100%; height:52px; padding:0 16px; border:1px solid var(--gray-200); border-radius:12px; margin-bottom:12px; font-size:1rem;">
+                                <button type="button" class="btn btn-outline" onclick="sendAuthOTP()" id="sendOtpBtn" style="width:100%; height:52px; font-size:1rem; font-weight:600;">
+                                    Send Login OTP
+                                </button>
+                                <div id="otpInputSection" style="display:none; margin-top:12px;">
+                                    <input type="text" id="authOtpInput" placeholder="Enter 6-digit OTP" maxlength="6" style="width:100%; height:52px; padding:0 16px; border:1px solid var(--blue-600); border-radius:12px; margin-bottom:12px; font-size:1.2rem; font-weight:800; letter-spacing:8px; text-align:center;">
+                                    <button type="button" class="btn btn-primary" onclick="verifyAuthOTP()" id="verifyOtpBtn" style="width:100%; height:52px; font-size:1rem; font-weight:700;">
+                                        Verify & Continue
+                                    </button>
+                                </div>
+                            </div>
+                            <small id="paymentRailHint">Payment opens on a unique secure PayGate URL after you place the order.</small>
+                        </div>
+                        <p style="margin:16px 0 0; color:var(--gray-400); font-size:0.75rem;">Fast & secure identity verification.</p>
+                    </div>
+                    
+                    <form id="checkoutForm" class="ck-form">
+                        <div class="form-group">
+                            <label for="ckEmail">Email Address</label>
+                            <input type="email" id="ckEmail" placeholder="your@email.com">
+                            <small>For invoices and account recovery.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ckPhone">WhatsApp Number</label>
+                            <div class="phone-input">
+                                <span class="prefix" aria-hidden="true">+91</span>
+                                <input type="tel" id="ckPhone" inputmode="numeric" autocomplete="tel-national" placeholder="Optional WhatsApp number" maxlength="10" required>
+                            </div>
+                            <small>Optional if your email is filled. Useful for instant support and delivery tracking.</small>
+                        </div>
+
+                        <div class="form-group" id="paymentMethodGroup">
+                            <label id="paymentMethodLabel">Payment Method</label>
+                            <div class="pm-grid">
+                                <label class="pm-card active" onclick="selectPayMethod(this)">
+                                    <input type="radio" name="paymethod" value="upi" checked>
+                                    <div class="pm-content">
+                                        <div class="pm-icon">
+                                            <div style="width:24px; height:24px; background:linear-gradient(135deg,#4CAF50,#2196F3); border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:9px; color:white; letter-spacing:-0.5px;">UPI</div>
+                                        </div>
+                                        <div class="pm-info">
+                                            <strong>UPI / QR</strong>
+                                            <span>Google Pay, PhonePe, Paytm</span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="pm-card" onclick="selectPayMethod(this)">
+                                    <input type="radio" name="paymethod" value="crypto">
+                                    <div class="pm-content">
+                                        <div class="pm-icon">
+                                            <img src="https://img.icons8.com/color/48/bitcoin.png" alt="Crypto" style="width:24px;">
+                                        </div>
+                                        <div class="pm-info">
+                                            <strong>USDT BEP20</strong>
+                                            <span>BNB Smart Chain only</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="ck-summary-mobile">
+                            <div class="line"><span>Total Amount</span> <strong id="mobileTotal">...</strong></div>
+                        </div>
+
+                        <div style="text-align:center; margin-top:16px;">
+                            <a href="javascript:history.back()" class="ck-back-store-link">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                                Back to Store
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="ck-success" id="ckSuccess" style="display:none">
+                    <div class="ck-card" style="text-align: center;">
+                        <div class="ck-success-icon"><i data-lucide="circle-check"></i></div>
+                        <h2 style="font-family:'Plus Jakarta Sans'; font-weight:800; margin-bottom:12px;">Payment Successful!</h2>
+                        <p style="color:var(--gray-500); margin-bottom:32px;">Your order page is ready. Automatic products show credentials there after payment; manual products show the admin contact option.</p>
+                        <a href="#" class="ck-pay-btn" id="trackOrderBtn" style="text-decoration:none;">
+                            <i data-lucide="package"></i> Track My Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="ck-right">
+                <div class="ck-card ck-summary-card">
+                    <h3 class="ck-summary-title">Order Summary</h3>
+                    
+                    <div class="ck-product-preview">
+                        <div class="ck-product-icon" id="ckProductIcon"><i data-lucide="clapperboard"></i></div>
+                        <div class="ck-product-info">
+                            <strong id="ckProductName">Loading...</strong>
+                            <span id="ckProductType">Select a plan to continue</span>
+                        </div>
+                    </div>
+
+                    <div id="comboSummary" style="display:none; margin-bottom:20px;">
+                        <div id="comboItemsList" class="combo-mini-list"></div>
+                    </div>
+
+                    <div class="ck-line-items">
+                        <div class="ck-line">
+                            <span>Subtotal</span>
+                            <span id="ckOrigPrice">...</span>
+                        </div>
+                        <div class="ck-line green">
+                            <span>Discount</span>
+                            <span id="ckDiscount">...</span>
+                        </div>
+                        <div class="ck-line green" id="couponLine" style="display:none">
+                            <span id="ckCouponCode">Coupon</span>
+                            <span id="ckCouponDiscount">...</span>
+                        </div>
+                        <div class="ck-line wallet-toggle-line" id="walletContainer" style="display:none; padding-top:12px; border-top:1px dashed #e2e8f0; margin-top:8px;">
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; width:100%;">
+                                <input type="checkbox" id="useWalletBtn" style="accent-color:var(--blue-600); width:16px; height:16px;">
+                                <span style="flex:1;">Use Wallet Balance (<span id="availableWallet">...</span>)</span>
+                            </label>
+                        </div>
+                        <div class="ck-line green" id="walletDiscountLine" style="display:none">
+                            <span>Wallet Deduction</span>
+                            <span id="ckWalletDiscount">...</span>
+                        </div>
+                    </div>
+
+                    <div class="ck-total-line">
+                        <span>Total</span>
+                        <span id="ckTotal">...</span>
+                    </div>
+
+                    <div class="ck-coupon" id="ckCouponSection">
+                        <div class="ck-coupon-input">
+                            <input type="text" id="ckCoupon" placeholder="Promo code">
+                            <button id="applyCoupon">Apply</button>
+                        </div>
+                        <div id="couponResult" class="ck-coupon-result"></div>
+                    </div>
+                    <div id="ckCouponLocked" style="display:none; text-align:center; padding:12px; border:1px dashed var(--gray-200); border-radius:12px; font-size:0.85rem; color:var(--gray-500);">
+                        <i data-lucide="lock" style="width:14px; height:14px; vertical-align:middle; margin-right:4px;"></i>
+                        Pricing locked for this payment session
+                    </div>
+
+                    <div class="ck-rail-preview" id="ckRailPreview">
+                        <div class="ck-rail-icon"><i data-lucide="smartphone"></i></div>
+                        <div>
+                            <strong id="ckRailTitle">UPI only in India</strong>
+                            <span id="ckRailSubtitle">You will continue on a secure hosted payment URL.</span>
+                        </div>
+                    </div>
+
+                    <label class="ck-policy-row">
+                        <input type="checkbox" id="ckPolicyAgree">
+                        <span>I have read and agree to the <a href="/refund" target="_blank">Refund Policy</a>.</span>
+                    </label>
+
+                    <button type="button" class="ck-pay-btn is-policy-locked" id="payNowBtn" disabled aria-disabled="true">
+                        <i data-lucide="shield-check"></i>
+                        <span class="ck-pay-text">
+                            <span class="ck-pay-label">Place Order</span>
+                            <span class="ck-pay-amount" id="payBtnAmount">...</span>
+                        </span>
+                    </button>
+
+                    <div class="ck-disclaimer" id="ckPaymentDisclaimer">
+                        After placing the order, payment opens on a unique secure URL.
+                    </div>
+
+                    <div class="ck-trust">
+                        <div class="t-item"><i data-lucide="zap"></i> Instant Activation</div>
+                        <div class="t-item"><i data-lucide="refresh-cw"></i> 100% Replacement Warranty</div>
+                        <div class="t-item"><i data-lucide="shield-check"></i> 256-bit Secure Payment</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col brand-col">
+            <a href="/" class="logo">
+                <img src="/assets/images/logo-upgraded-20260603-small.webp" alt="GetOTTs" style="height:36px; border-radius:10px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));">
+                <span class="logo-name" style="font-size:1.6rem; font-weight:900; letter-spacing:-0.04em; background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GetOTTs</span>
+            </a>
+                <p>The world's most trusted OTT subscription marketplace. Cheaper plans, instant delivery, real support.</p>
+                <div class="social-row">
+    <a href="https://instagram.com/getotts" target="_blank" aria-label="Instagram" class="social-icon-btn instagram">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+    </a>
+    <a href="https://t.me/getotts" target="_blank" aria-label="Telegram" class="social-icon-btn telegram">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="none">
+            <path d="M21.2 4.4 2.4 10.5c-.6.2-.6 1.1 0 1.3l4.5 1.5 1.7 5.3c.1.4.6.6 1 .3l2.5-2 4.3 3.2c.5.3 1.1 0 1.2-.5L21.8 5.5c.2-.7-.4-1.3-1-.9z"/>
+        </svg>
+    </a>
+    <a href="https://wa.me/919088212294" target="_blank" aria-label="WhatsApp" class="social-icon-btn whatsapp">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="none">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+    </a>
+</div>
+            </div>
+            <div class="footer-links-grid">
+            <div class="footer-col">
+                <h4>Browse</h4>
+                <a href="/category/streaming">Streaming</a>
+                <a href="/category/music">Music</a>
+                <a href="/category/ai-tools">AI Tools</a>
+                <a href="/category/vpn">VPN</a>
+                <a href="/category/gift-cards">Gift Cards</a>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <a href="/about">About Us</a>
+                <a href="/contact">Contact Us</a>
+                <a href="https://wa.me/919088212294?text=I%20want%20to%20become%20an%20affiliate">Affiliates</a>
+                <a href="/order">Track Order</a>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <p><strong>Need help?</strong> WhatsApp us at <a href="https://wa.me/919088212294">+91 90882 12294</a> - we typically respond within 10 minutes.</p>
+                <a href="/refund">Refund Policy</a>
+                <a href="/terms">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+            </div>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <p>&copy; 2026 GetOTTs - All Rights Reserved</p>
+            <div class="footer-pays">
+                <span>UPI</span><span>GPay</span><span>PhonePe</span><span>Crypto</span><span>Binance Pay</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function selectPayMethod(el) {
+            if (!el || el.style.display === 'none') return;
+            document.querySelectorAll('.pm-card').forEach(card => card.classList.remove('active'));
+            el.classList.add('active');
+            el.querySelector('input').checked = true;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+# GetOTTs — Netlify Configuration
+
+[build]
+  # Frontend is a static site — no build step needed
+  publish = "."
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.getotts.com https://auth.getotts.com https://paygate.getotts.com https://wa.getotts.com https://YOUR_SUPABASE_PROJECT_REF.supabase.co wss://YOUR_SUPABASE_PROJECT_REF.supabase.co https://api.country.is https://ipapi.co https://1.1.1.1 https://www.facebook.com https://connect.facebook.net; frame-src https://challenges.cloudflare.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+[[headers]]
+  for = "/dashboard*"
+  [headers.values]
+    X-Robots-Tag = "noindex, noarchive, nosnippet"
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+
+[[headers]]
+  for = "/wallet*"
+  [headers.values]
+    X-Robots-Tag = "noindex, noarchive, nosnippet"
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+
+[[headers]]
+  for = "/checkout*"
+  [headers.values]
+    X-Robots-Tag = "noindex, noarchive, nosnippet"
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+
+[[headers]]
+  for = "/order*"
+  [headers.values]
+    X-Robots-Tag = "noindex, noarchive, nosnippet"
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+
+[[headers]]
+  for = "/login*"
+  [headers.values]
+    X-Robots-Tag = "noindex, noarchive, nosnippet"
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache videos aggressively (served from Netlify CDN, not Supabase)
+[[headers]]
+  for = "/assets/videos/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML files - Do NOT cache aggressively to ensure users always get the latest version
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Enable Pretty URLs (strip .html automatically)
+[build.processing.html]
+  pretty_urls = true
+
+[[edge_functions]]
+  function = "seo"
+  path = "/"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/product/*"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/blog/*"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/post"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/netflix"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/spotify"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/spotify-premium"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/chatgpt"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/chatgpt-plus"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/canva"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/sonyliv"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/sony-liv"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/sonylive"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/zee5"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/zee5-premium"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/apple-music"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/applemusic"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/combo-deals"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/category/streaming"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/category/music"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/category/ai-tools"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/category/vpn"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/category/gift-cards"
+
+[[edge_functions]]
+  function = "seo"
+  path = "/category/bundles"
+
+# Force redirect .html links to clean URLs
+[[redirects]]
+  from = "/dashboard.html"
+  to = "/dashboard"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/wallet"
+  to = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/login.html"
+  to = "/login"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin.html"
+  to = "/admin"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/checkout.html"
+  to = "/checkout"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/register.html"
+  to = "/register"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/order.html"
+  to = "/order"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/about.html"
+  to = "/about"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact.html"
+  to = "/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/privacy"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/terms.html"
+  to = "/terms"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/refund.html"
+  to = "/refund"
+  status = 301
+  force = true

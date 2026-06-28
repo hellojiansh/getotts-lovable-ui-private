@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/tracking.js?v=20260612-meta878" defer></script>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - GetOTTs</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="stylesheet" href="/css/contrast-fix.css?v=20260512-headericon1">
+    <meta name="description" content="Create a free GetOTTs account. Get ?50 welcome bonus and unlock exclusive deals on premium OTT subscriptions.">
+    <script>
+        // Preserve referral code when redirecting to login
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        if (ref) {
+            localStorage.setItem('GetOTTs_referral_code', ref);
+        }
+        window.location.replace('login' + (ref ? '?ref=' + ref : ''));
+    </script>
+</head>
+<body>
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N5257L2M" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=878611847969093&ev=PageView&noscript=1" alt="">
+    </noscript>
+
+<p>Redirecting to <a href="login">login</a>...</p>
+</body>
+</html>
+

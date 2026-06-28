@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Apple Music logo</title>
+  <desc id="desc">A clean Apple Music style badge for GetOTTs product cards.</desc>
+  <defs>
+    <linearGradient id="bg" x1="86" y1="58" x2="438" y2="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff3b6b"/>
+      <stop offset="0.48" stop-color="#f43f5e"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#020617" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="48" y="48" width="416" height="416" rx="98" fill="url(#bg)" filter="url(#shadow)"/>
+  <path d="M320 136v184c0 37-31 66-73 66-34 0-60-19-60-45 0-28 30-49 65-49 14 0 26 3 36 9V188l-112 22v134c0 37-31 66-73 66-34 0-60-19-60-45 0-28 30-49 65-49 14 0 26 3 36 9V174c0-14 9-25 23-28l134-27c10-2 19 6 19 17Z" fill="#ffffff"/>
+  <text x="256" y="438" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="800" letter-spacing="1" fill="#ffffff">Music</text>
+</svg>

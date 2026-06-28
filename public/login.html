@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="/js/tracking.js?v=20260612-meta878" defer></script>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login &mdash; GetOTTs</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="description" content="Sign in to GetOTTs with WhatsApp. No passwords needed &mdash; instant, secure login.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+    <script>
+        (function () {
+            var host = window.location.hostname;
+            var isLocal = host === 'localhost' || host === '127.0.0.1';
+            if (!isLocal && host.endsWith('.netlify.app')) {
+                window.location.replace('https://getotts.com' + window.location.pathname + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/js/lucide-lite.js?v=20260519-lite1"></script>
+    <link rel="stylesheet" href="/css/styles.css?v=20260430-05">
+    <link rel="stylesheet" href="/css/auth.css?v=20260513-loginpolish1">
+    <link rel="stylesheet" href="/css/toast.css?v=1.0">
+    <link rel="stylesheet" href="/css/chat.css?v=20260518-chatui14">
+    <link rel="stylesheet" href="/css/contrast-fix.css?v=20260512-headericon1">
+    <style>
+        .auth-wrapper.login-page {
+            min-height: 100svh;
+            justify-content: center;
+            padding: 24px 18px;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(37,99,235,.08), transparent 32%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+        }
+        .auth-wrapper.login-page .auth-header {
+            margin-bottom: 28px;
+        }
+        .auth-wrapper.login-page .auth-card {
+            max-width: 430px;
+            border-radius: 24px;
+            padding: 34px 36px 28px;
+            border-color: rgba(148,163,184,.18);
+            box-shadow: 0 28px 80px rgba(15,23,42,.12);
+        }
+        .auth-wrapper.login-page .auth-card h1 {
+            font-size: clamp(1.45rem, 4vw, 1.8rem);
+            letter-spacing: 0;
+            margin-bottom: 6px;
+        }
+        .auth-wrapper.login-page .auth-sub {
+            margin-bottom: 24px;
+            color: #475569;
+        }
+        .login-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #64748b;
+            font-size: .78rem;
+            font-weight: 700;
+            margin: 18px 0;
+        }
+        .login-divider::before,
+        .login-divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .login-divider span {
+            padding: 0 12px;
+        }
+        .login-help {
+            text-align: center;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #eef2f7;
+        }
+        .login-help p {
+            font-size: .85rem;
+            color: #64748b;
+            margin: 0 0 10px;
+        }
+        .login-help-links {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-help-links a {
+            font-size: .86rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .login-help-links i {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* -- Login Method Cards -- */
+        .login-methods {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .btn-login-method {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            width: 100%; min-height: 56px; padding: 0 22px;
+            border: none; border-radius: 16px;
+            font-size: 1rem; font-weight: 800;
+            cursor: pointer; transition: all 0.25s ease;
+            font-family: var(--font-body);
+            color: #ffffff !important; position: relative;
+            box-shadow: 0 12px 30px rgba(15,23,42,.12);
+        }
+        .btn-login-method:not(:disabled) * {
+            color: #ffffff !important;
+        }
+        .btn-login-method:hover {
+            transform: translateY(-2px);
+        }
+        .btn-login-method:active {
+            transform: translateY(0);
+        }
+        .btn-login-method:disabled {
+            opacity: 1; cursor: not-allowed; transform: none;
+            background: #e2e8f0 !important;
+            color: #64748b !important;
+            box-shadow: none;
+        }
+        .btn-login-method:disabled * { color: #64748b !important; }
+        .btn-login-method svg { flex-shrink: 0; }
+        .btn-email-login {
+            background: #eff6ff !important;
+            color: #0f172a !important;
+            border: 1px solid #bfdbfe;
+            box-shadow: none;
+        }
+        .btn-email-login *,
+        .btn-email-login span {
+            color: #0f172a !important;
+        }
+
+        .email-input-wrap {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .email-input-icon {
+            position: absolute;
+            left: 17px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            display: flex;
+        }
+        .login-email-input {
+            width: 100%;
+            height: 56px;
+            padding: 0 16px 0 50px;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-family: var(--font-body);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        .login-email-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+        }
+
+        /* WhatsApp */
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #22c55e, #0f9f8f);
+        }
+        .btn-whatsapp:hover {
+            box-shadow: 0 8px 28px rgba(37, 211, 102, 0.35);
+        }
+
+
+        /* Method badge */
+        .method-badge {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 0.78rem; color: #475569;
+            margin-top: 10px;
+        }
+        .method-badge svg {
+            width: 14px; height: 14px; color: #25D366;
+        }
+
+        /* Login info */
+        .login-info {
+            text-align: center; margin-top: 18px;
+            padding: 14px 18px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+        .login-info h4 {
+            font-size: 0.9rem; color: var(--gray-700);
+            margin: 0 0 8px; font-weight: 600;
+        }
+        .login-info p {
+            font-size: 0.82rem; color: #475569;
+            margin: 0; line-height: 1.5;
+        }
+
+        @media (max-width: 560px) {
+            .auth-wrapper.login-page {
+                justify-content: flex-start;
+                padding: 20px 14px;
+            }
+            .auth-wrapper.login-page .auth-header {
+                margin: 12px 0 22px;
+            }
+            .auth-wrapper.login-page .auth-card {
+                padding: 28px 20px 22px;
+                border-radius: 22px;
+            }
+            .login-info {
+                padding: 12px 14px;
+            }
+        }
+
+        /* -- Waiting UI -- */
+        .wa-waiting { text-align: center; padding: 8px 0; }
+        .wa-waiting h2 {
+            font-family: var(--font-heading); font-size: 1.6rem; margin: 16px 0 4px;
+        }
+        .wa-waiting-sub { color: var(--gray-500); margin-bottom: 24px; font-size: 0.9rem; }
+        .wa-waiting-icon { margin-bottom: 8px; }
+
+        .wa-code-display {
+            background: var(--gray-50); border: 2px dashed var(--gray-200);
+            border-radius: 12px; padding: 16px 20px;
+            margin: 0 auto 20px; display: inline-flex;
+            align-items: baseline; gap: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .wa-code-prefix { font-size: 0.85rem; color: var(--gray-400); font-weight: 500; }
+        .wa-code-value {
+            font-size: 1.8rem; font-weight: 800;
+            color: #25D366; letter-spacing: 4px;
+        }
+
+        .wa-progress {
+            width: 100%; height: 4px; background: var(--gray-100);
+            border-radius: 100px; overflow: hidden; margin-bottom: 8px;
+        }
+        .wa-progress-bar {
+            width: 100%; height: 100%; background: linear-gradient(90deg, #25D366, #128C7E);
+            border-radius: 100px; transition: width 1s linear;
+        }
+        .wa-timer { font-size: 0.8rem; color: var(--gray-400); margin-bottom: 28px; }
+
+        .wa-steps {
+            display: flex; justify-content: center; gap: 24px;
+            margin-bottom: 28px; flex-wrap: wrap;
+        }
+        .wa-step {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.85rem; color: var(--gray-400);
+            transition: all 0.3s ease;
+        }
+        .wa-step.active { color: var(--gray-800); font-weight: 600; }
+        .wa-step.done { color: #25D366; }
+        .wa-step-num {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: var(--gray-100); display: flex;
+            align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .wa-step.active .wa-step-num { background: #25D366; color: white; }
+        .wa-step.done .wa-step-num { background: #25D366; color: white; }
+
+        .wa-actions-row {
+            display: flex; gap: 12px; justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-wa-resend {
+            background: #25D366; color: white; padding: 10px 20px;
+            border-radius: 10px; font-weight: 600; font-size: 0.85rem;
+            text-decoration: none; transition: all 0.2s ease;
+        }
+        .btn-wa-resend:hover { background: #1da851; }
+        .wa-cancel-btn {
+            padding: 10px 20px; border-radius: 10px;
+            font-size: 0.85rem; cursor: pointer;
+        }
+
+        .wa-spinner {
+            display: inline-block; width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: white; border-radius: 50%;
+            animation: wa-spin .6s linear infinite;
+        }
+        @keyframes wa-spin { to { transform: rotate(360deg); } }
+
+        /* -- Success -- */
+        .wa-success { text-align: center; padding: 40px 0; }
+        .wa-success-check { font-size: 64px; margin-bottom: 12px; }
+        .wa-success h2 {
+            font-family: var(--font-heading); font-size: 2rem;
+            color: #25D366; margin-bottom: 8px;
+        }
+        .wa-redirect-msg {
+            color: var(--gray-400); font-size: 0.85rem; margin-top: 12px;
+        }
+
+        /* -- Email Verify Modal -- */
+        .email-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+            z-index: 9999; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .email-modal-overlay.active { display: flex; }
+        .email-modal {
+            background: white; border-radius: 20px;
+            padding: 36px 32px; max-width: 440px; width: 100%;
+            box-shadow: 0 24px 64px rgba(0,0,0,.15);
+            text-align: center; position: relative;
+            animation: modalSlideUp .3s ease;
+        }
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .email-modal h2 {
+            font-family: var(--font-heading); font-size: 1.4rem;
+            margin: 12px 0 6px; color: var(--gray-900);
+        }
+        .email-modal .modal-sub {
+            color: var(--gray-500); font-size: 0.88rem; margin-bottom: 24px;
+        }
+        .email-modal .email-input-wrap {
+            position: relative; margin-bottom: 16px;
+        }
+        .email-modal input {
+            width: 100%; padding: 14px 16px; border: 2px solid var(--gray-200);
+            border-radius: 12px; font-size: 1rem; font-family: var(--font-body);
+            outline: none; transition: border-color .2s;
+            box-sizing: border-box;
+        }
+        .email-modal input:focus { border-color: #C9A84C; }
+        .email-modal input.error { border-color: #ef4444; }
+        
+        .otp-inputs {
+            display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;
+        }
+        .otp-inputs input {
+            width: 48px; height: 56px; text-align: center;
+            font-size: 1.4rem; font-weight: 700; letter-spacing: 0;
+            border: 2px solid var(--gray-200); border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            padding: 0;
+        }
+        .otp-inputs input:focus { border-color: #C9A84C; }
+        
+        .email-modal .btn-primary {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, #C9A84C, #E8D48B);
+            color: #1a1a2e; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: all .2s; font-family: var(--font-body);
+        }
+        .email-modal .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(201,168,76,.3);
+            transform: translateY(-1px);
+        }
+        .email-modal .btn-primary:disabled {
+            opacity: .6; cursor: not-allowed; transform: none;
+        }
+        .modal-skip {
+            display: inline-block; margin-top: 12px;
+            color: var(--gray-400); font-size: .82rem;
+            cursor: pointer; text-decoration: none;
+        }
+        .modal-skip:hover { color: var(--gray-600); }
+        .modal-error {
+            color: #ef4444; font-size: .82rem; margin-top: 8px;
+            min-height: 20px;
+        }
+        .email-modal-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(201,168,76,.16), rgba(232,212,139,.28));
+            color: #b28b21;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 8px;
+        }
+        .email-modal-icon i {
+            width: 34px; height: 34px;
+        }
+        .modal-success-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 8px;
+        }
+        .otp-timer {
+            font-size: .8rem; color: var(--gray-400); margin-bottom: 16px;
+        }
+        .resend-btn {
+            background: none; border: none; color: #C9A84C;
+            font-weight: 600; cursor: pointer; font-size: .85rem;
+            text-decoration: underline;
+        }
+        .resend-btn:disabled { color: var(--gray-300); cursor: not-allowed; text-decoration: none; }
+        
+
+    </style>
+</head>
+<body>
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N5257L2M" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+        <img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=878611847969093&ev=PageView&noscript=1" alt="">
+    </noscript>
+
+<div class="auth-wrapper login-page">
+        <header class="auth-header">
+            <a href="/" class="logo" style="text-decoration:none; display:flex; align-items:center; gap:12px;">
+                <img src="/assets/images/logo-upgraded-20260603-small.webp" alt="GetOTTs" style="height:36px; border-radius:10px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));">
+                <span class="logo-name" style="font-size:1.6rem; font-weight:900; letter-spacing:-0.04em; background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GetOTTs</span>
+            </a>
+        </header>
+        
+        <div class="auth-card">
+            <h1>Welcome to GetOTTs</h1>
+            <p class="auth-sub">Sign in instantly - no password needed.</p>
+            
+            <!-- Login Methods -->
+            <div id="loginMethodSelection">
+                <div class="email-input-wrap">
+                    <div class="email-input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </div>
+                    <input type="email" id="loginEmailInput" class="login-email-input" placeholder="Enter your email address" autocomplete="email">
+                </div>
+                <button class="btn-login-method btn-email-login" onclick="EMAIL_LOGIN.sendOtp()">
+                    <span>Continue with Email</span>
+                </button>
+
+                <div class="login-divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="login-methods">
+                    <button id="waLoginBtn" class="btn-login-method btn-whatsapp" onclick="WA_AUTH.start()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Continue with WhatsApp
+                    </button>
+                </div>
+
+            <div class="method-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Secure login - No passwords - Instant access
+            </div>
+
+            <div class="login-info">
+                <h4>How it works</h4>
+                <p>
+                    Click WhatsApp. Send a quick code. Admin verifies your login.<br>
+                    Your phone is verified directly from WhatsApp. No fake accounts.
+                </p>
+            </div>
+        </div>
+
+            <!-- OTP Verification View (hidden initially) -->
+            <div id="emailOtpView" style="display: none; text-align: center;">
+                <h2 style="font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 8px;">Enter Code</h2>
+                <p class="modal-sub" style="color: var(--gray-500); font-size: 0.9rem; margin-bottom: 24px;">We sent a 6-digit code to <strong id="sentToEmailDisplay"></strong></p>
+                
+                <div class="otp-inputs" id="loginOtpInputs" style="margin-bottom: 24px;">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                </div>
+                
+                <button class="btn-login-method" onclick="EMAIL_LOGIN.verifyOtp()" style="background: linear-gradient(135deg, #C9A84C, #E8D48B); color: #1a1a2e; margin-bottom: 16px;">
+                    Verify & Login
+                </button>
+                
+                <button class="resend-btn" id="loginResendBtn" onclick="EMAIL_LOGIN.resend()" disabled>
+                    Resend code (30s)
+                </button>
+                <div style="margin-top: 16px;">
+                    <a href="#" onclick="EMAIL_LOGIN.back()" style="color: var(--gray-400); font-size: 0.85rem; text-decoration: underline;">Use a different email</a>
+                </div>
+            </div>
+            
+            <div class="login-help">
+                <p>Having trouble? We're here to help.</p>
+                <div class="login-help-links">
+                    <a href="https://wa.me/919088212294" target="_blank" style="color: #25D366; font-weight: 600; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                        <i data-lucide="message-circle" style="width:16px;"></i> WhatsApp
+                    </a>
+                    <span style="color: var(--gray-200);">|</span>
+                    <a href="#" onclick="if(window.LiveChat) window.LiveChat.toggle(true); return false;" style="color: var(--blue-600); font-weight: 600; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                        <i data-lucide="message-square" style="width:16px;"></i> Live Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Verification Modal (shown after login) -->
+    <div class="email-modal-overlay" id="emailModalOverlay">
+        <div class="email-modal" id="emailModal">
+            <!-- Step 1: Enter email -->
+            <div id="emailStep1">
+                <div class="email-modal-icon"><i data-lucide="mail-check"></i></div>
+                <h2>Verify Your Email</h2>
+                <p class="modal-sub">We'll use this for invoices, order tracking, and support.</p>
+                
+                <div class="email-input-wrap">
+                    <input type="email" id="verifyEmailInput" placeholder="you@example.com" autocomplete="email">
+                </div>
+                <div class="modal-error" id="emailError"></div>
+                
+                <button class="btn-primary" id="sendOtpBtn" onclick="EMAIL_VERIFY.sendOtp()">
+                    Send Verification Code
+                </button>
+                <a class="modal-skip" onclick="EMAIL_VERIFY.skip()">Skip for now</a>
+            </div>
+
+            <!-- Step 2: Enter OTP -->
+            <div id="emailStep2" style="display:none;">
+                <div class="email-modal-icon"><i data-lucide="shield-check"></i></div>
+                <h2>Enter Code</h2>
+                <p class="modal-sub">We sent a 6-digit code to <strong id="sentToEmail"></strong></p>
+                
+                <div class="otp-inputs" id="otpInputs">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                </div>
+                <div class="otp-timer" id="otpTimer">Code expires in <strong>10:00</strong></div>
+                <div class="modal-error" id="otpError"></div>
+                
+                <button class="btn-primary" id="verifyOtpBtn" onclick="EMAIL_VERIFY.verifyOtp()">
+                    Verify Email
+                </button>
+                <div style="margin-top:12px;">
+                    <button class="resend-btn" id="resendBtn" onclick="EMAIL_VERIFY.resend()" disabled>
+                        Resend code (30s)
+                    </button>
+                </div>
+                <a class="modal-skip" onclick="EMAIL_VERIFY.skip()">Skip for now</a>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div id="emailStep3" style="display:none;">
+                <div class="modal-success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:32px;height:32px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <h2>Email Verified!</h2>
+                <p class="modal-sub">You'll receive invoices and updates at your verified email.</p>
+                <button class="btn-primary" onclick="EMAIL_VERIFY.done()">
+                    Go to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/toast.js?v=20260515-longtoast2"></script>
+    <script src="/js/bundle.min.js?v=20260522-netflix1" defer></script>
+    <script src="/js/wa-auth.js?v=20260515-waemail2" defer></script>
+    <script src="/js/chat.js?v=20260519-security1" defer></script>
+    <script src="/js/email-login.js?v=1.0" defer></script>
+    <script src="/js/email-verify.js?v=20260515-otpmsg1" defer></script>
+    <script>
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            const token = localStorage.getItem('GetOTTs_customer_token');
+            const customer = localStorage.getItem('GetOTTs_customer');
+            if (token && customer) {
+                // Already logged in &mdash; check if email needs verification
+                try {
+                    const c = JSON.parse(customer);
+                    if (!c.email_verified && (!c.email || c.email.startsWith('wa_'))) {
+                        EMAIL_VERIFY.show();
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+                } catch {
+                    window.location.href = '/dashboard';
+                }
+            }
+        });
+
+        // Redirect showAuthToast to our premium Toast manager
+        function showAuthToast(msg, type) {
+            if (typeof Toast !== 'undefined') {
+                if (type === 'success') Toast.success("Success", msg);
+                else if (type === 'error') Toast.error("Error", msg);
+                else Toast.info("Notice", msg);
+            } else {
+                console.warn("Toast system not loaded, falling back to legacy toast");
+                // Legacy fallback for safety
+                let toast = document.getElementById('authToast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'authToast';
+                    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 24px;border-radius:12px;font-size:.9rem;font-weight:500;z-index:99999;transition:transform .3s ease;color:white;max-width:90vw;text-align:center;';
+                    document.body.appendChild(toast);
+                }
+                toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+                toast.textContent = msg;
+                toast.style.transform = 'translateX(-50%) translateY(0)';
+                setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(100px)'; }, type === 'error' ? 12000 : 7000);
+            }
+        }
+    </script>
+</body>
+</html>
+

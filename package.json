@@ -1,0 +1,14 @@
+{
+  "name": "getotts-lovable-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GetOTTs static UI handoff for Lovable AI.",
+  "scripts": {
+    "start": "npx serve public",
+    "preview": "npx serve public",
+    "check": "node --check public/js/app.js && node --check public/js/config.js && node --check admin-ui/static/js/admin.v51.js"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
