@@ -1,0 +1,266 @@
+/* ============================================================
+   GetOTTs UI Upgrades — v1 (2026-06-28)
+   Additive polish: mobile tab bar, sticky buy bar, sort/view
+   toggle, scroll FAB, progress bar, confetti, lazy-fade images.
+   Pure presentation — no backend coupling.
+   ============================================================ */
+
+/* ---------- Top scroll-progress bar ---------- */
+#ug-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #0b64ff 0%, #7c3aed 60%, #ec4899 100%);
+    z-index: 9999;
+    transition: width .12s ease-out;
+    box-shadow: 0 0 8px rgba(124,58,237,.6);
+    pointer-events: none;
+}
+
+/* ---------- Scroll-to-top FAB ---------- */
+#ug-scrolltop {
+    position: fixed;
+    right: 18px;
+    bottom: 84px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #0b64ff, #7c3aed);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 10px 26px rgba(11,100,255,.36);
+    opacity: 0;
+    transform: translateY(12px) scale(.9);
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease;
+    z-index: 998;
+}
+#ug-scrolltop.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+#ug-scrolltop:hover { transform: translateY(-2px) scale(1.04); }
+#ug-scrolltop svg { width: 20px; height: 20px; }
+@media (min-width: 992px) { #ug-scrolltop { bottom: 24px; right: 24px; } }
+
+/* ---------- Mobile bottom tab bar ---------- */
+#ug-tabbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 997;
+    display: none;
+    background: rgba(7, 16, 32, .92);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
+    border-top: 1px solid rgba(148, 163, 184, .18);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, .35);
+}
+#ug-tabbar .ug-tab {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 4px;
+    color: rgba(226, 232, 240, .78);
+    text-decoration: none;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    border-radius: 12px;
+    transition: color .15s ease, background .15s ease, transform .15s ease;
+    min-height: 44px;
+}
+#ug-tabbar .ug-tab svg { width: 22px; height: 22px; stroke-width: 2; }
+#ug-tabbar .ug-tab.active { color: #93c5fd; background: rgba(59, 130, 246, .14); }
+#ug-tabbar .ug-tab:active { transform: scale(.94); }
+#ug-tabbar > .ug-inner { display: flex; align-items: stretch; max-width: 560px; margin: 0 auto; }
+@media (max-width: 767px) {
+    #ug-tabbar { display: block; }
+    body { padding-bottom: 68px; }
+    #ug-scrolltop { bottom: 96px; }
+}
+
+/* ---------- Sticky buy bar (product mobile) ---------- */
+#ug-buybar {
+    position: fixed;
+    left: 0; right: 0; bottom: 68px;
+    z-index: 996;
+    display: none;
+    background: rgba(15, 23, 42, .96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(148, 163, 184, .18);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 36px rgba(0, 0, 0, .45);
+    transform: translateY(120%);
+    transition: transform .28s cubic-bezier(.2,.7,.2,1);
+}
+#ug-buybar.show { transform: translateY(0); }
+#ug-buybar .ug-bb-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    max-width: 560px;
+    margin: 0 auto;
+}
+#ug-buybar .ug-bb-price-row { display: flex; flex-direction: column; min-width: 0; }
+#ug-buybar .ug-bb-label { font-size: 11px; color: rgba(203,213,225,.7); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+#ug-buybar .ug-bb-price { color: #fff; font-weight: 800; font-size: 20px; line-height: 1.1; }
+#ug-buybar .ug-bb-price small { font-weight: 500; color: rgba(203,213,225,.6); margin-left: 6px; font-size: 12px; text-decoration: line-through; }
+#ug-buybar .ug-bb-btn {
+    appearance: none; border: none; cursor: pointer;
+    background: linear-gradient(135deg, #0b64ff, #7c3aed);
+    color: #fff; font-weight: 800;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: 15px;
+    box-shadow: 0 10px 22px rgba(11,100,255,.36);
+    transition: transform .15s ease;
+    min-height: 48px;
+}
+#ug-buybar .ug-bb-btn:active { transform: scale(.97); }
+@media (max-width: 767px) {
+    body.product-page { padding-bottom: 142px; }
+}
+
+/* ---------- Category sort + view toggle ---------- */
+.ug-toolbar-actions {
+    display: flex; align-items: center; gap: 10px; margin-left: auto;
+    flex-wrap: wrap;
+}
+.ug-sort-wrap {
+    position: relative;
+    display: inline-flex; align-items: center;
+}
+.ug-sort {
+    appearance: none; -webkit-appearance: none;
+    background: rgba(15, 23, 42, .04);
+    border: 1px solid rgba(148, 163, 184, .35);
+    color: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 36px 9px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    min-height: 40px;
+    transition: border-color .15s, background .15s;
+}
+.ug-sort:hover, .ug-sort:focus { border-color: #0b64ff; outline: none; background: rgba(11,100,255,.06); }
+.ug-sort-wrap::after {
+    content: "";
+    position: absolute; right: 12px; top: 50%;
+    width: 8px; height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-70%) rotate(45deg);
+    opacity: .55;
+    pointer-events: none;
+}
+.ug-view-toggle {
+    display: inline-flex;
+    background: rgba(15, 23, 42, .04);
+    border: 1px solid rgba(148, 163, 184, .35);
+    border-radius: 12px;
+    padding: 3px;
+    gap: 2px;
+}
+.ug-view-toggle button {
+    appearance: none; border: none; background: transparent;
+    width: 36px; height: 34px;
+    display: grid; place-items: center;
+    border-radius: 9px;
+    cursor: pointer;
+    color: inherit;
+    opacity: .6;
+    transition: background .15s, opacity .15s;
+}
+.ug-view-toggle button.active { background: #fff; opacity: 1; box-shadow: 0 2px 6px rgba(15,23,42,.08); }
+.ug-view-toggle button svg { width: 16px; height: 16px; }
+
+/* List view layout */
+.product-row.ug-list-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+.product-row.ug-list-view > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+}
+
+/* ---------- Skeleton loader ---------- */
+.ug-skeleton {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+}
+.ug-skel-card {
+    background: linear-gradient(110deg, rgba(148,163,184,.10) 8%, rgba(148,163,184,.22) 18%, rgba(148,163,184,.10) 33%);
+    background-size: 200% 100%;
+    border-radius: 16px;
+    height: 240px;
+    animation: ug-shimmer 1.4s linear infinite;
+}
+@keyframes ug-shimmer { to { background-position: -200% 0; } }
+
+/* ---------- Confetti on success ---------- */
+.ug-confetti {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    overflow: hidden;
+}
+.ug-confetti i {
+    position: absolute;
+    top: -12px;
+    width: 8px; height: 14px;
+    opacity: .9;
+    will-change: transform;
+    animation: ug-fall linear forwards;
+}
+@keyframes ug-fall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ---------- Lazy fade-in for images ---------- */
+img.ug-fade { opacity: 0; transition: opacity .45s ease; }
+img.ug-fade.ug-loaded { opacity: 1; }
+
+/* ---------- Header search autocomplete ---------- */
+.ug-suggest {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid rgba(148,163,184,.25);
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(15,23,42,.18);
+    padding: 6px;
+    max-height: 360px;
+    overflow-y: auto;
+    z-index: 50;
+    display: none;
+}
+.ug-suggest.show { display: block; }
+.ug-suggest a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background .12s;
+}
+.ug-suggest a:hover, .ug-suggest a.ug-active { background: rgba(11,100,255,.08); color: #0b64ff; }
+.ug-suggest a img { width: 26px; height: 26px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+.ug-suggest .ug-suggest-empty { padding: 14px; text-align: center; color: rgba(15,23,42,.5); font-size: 13px; }
+
+/* ---------- Reduce-motion respect ---------- */
+@media (prefers-reduced-motion: reduce) {
+    #ug-progress, #ug-scrolltop, #ug-buybar, .ug-confetti i, .ug-skel-card, img.ug-fade { transition: none !important; animation: none !important; }
+}

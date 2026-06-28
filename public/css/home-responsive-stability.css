@@ -1152,8 +1152,9 @@ body.home-page .hot-deals .p-card-badges {
 
 @media (min-width: 821px) and (max-width: 1040px) {
   body.home-page .animated-hero {
-    min-height: 590px !important;
+    min-height: 0 !important;
     padding-top: 0 !important;
+    padding-bottom: 18px !important;
     overflow: hidden !important;
   }
 
@@ -1240,6 +1241,10 @@ body.home-page .hot-deals .p-card-badges {
 
   body.home-page .mobile-proof-strip {
     display: none !important;
+  }
+
+  body.home-page #trendingSection.hot-deals {
+    padding-top: 18px !important;
   }
 }
 
@@ -1856,4 +1861,24 @@ body.home-page .performance-badge span {
     width: min(100%, 360px) !important;
     margin: 24px 0 0 auto !important;
   }
+}
+
+/* === 2026-06-28 UI fix: hide mobile profile link on desktop & tame header overflow === */
+.mobile-profile-nav, #mobileProfileNav { display: none !important; }
+@media (max-width: 991px) {
+  .main-nav.open .mobile-profile-nav,
+  .main-nav.open #mobileProfileNav { display: inline-flex !important; }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  body.home-page .main-nav { gap: 10px !important; }
+  body.home-page .main-nav-link { font-size: 0.76rem !important; padding: 6px 4px !important; }
+  body.home-page .search-box { width: 150px !important; }
+  body.home-page .header-actions { gap: 8px !important; }
+  body.home-page .header-auth-btn { padding: 0 10px !important; font-size: 0.72rem !important; }
+}
+@media (min-width: 1200px) and (max-width: 1359px) {
+  body.home-page .main-nav { gap: 14px !important; }
+  body.home-page .search-box { width: 180px !important; }
+  body.home-page .header-actions { gap: 10px !important; }
 }

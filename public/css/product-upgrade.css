@@ -1,0 +1,554 @@
+/* ============================================================
+   GetOTTs — Product Page Upgrade v1 (2026-06-28)
+   Additive layer. Only loaded on /product.html.
+   ============================================================ */
+
+/* ---------- Targeted reset: flatten nested image frames ----------
+   Base + premium-pages wrap the image in: page → outer card → inner panel → image.
+   This reset forcibly strips background, border, outline, and box-shadow from the
+   three wrapper layers across ALL states (hover/focus/active/focus-visible/focus-within)
+   and both pseudo-elements, so only the image card renders.
+   The `html` prefix raises specificity above premium-pages.css `!important` rules. */
+html body:has(.product-page-main) .product-grid-main,
+html body:has(.product-page-main) .product-grid-main:hover,
+html body:has(.product-page-main) .product-grid-main:focus,
+html body:has(.product-page-main) .product-grid-main:focus-visible,
+html body:has(.product-page-main) .product-grid-main:focus-within,
+html body:has(.product-page-main) .product-grid-main:active,
+html body:has(.product-page-main) .product-grid-main::before,
+html body:has(.product-page-main) .product-grid-main::after,
+html body:has(.product-page-main) .product-media,
+html body:has(.product-page-main) .product-media:hover,
+html body:has(.product-page-main) .product-media:focus,
+html body:has(.product-page-main) .product-media:focus-visible,
+html body:has(.product-page-main) .product-media:focus-within,
+html body:has(.product-page-main) .product-media:active,
+html body:has(.product-page-main) .product-media::before,
+html body:has(.product-page-main) .product-media::after,
+html body:has(.product-page-main) .product-image-large,
+html body:has(.product-page-main) .product-image-large:hover,
+html body:has(.product-page-main) .product-image-large:focus,
+html body:has(.product-page-main) .product-image-large:focus-visible,
+html body:has(.product-page-main) .product-image-large:focus-within,
+html body:has(.product-page-main) .product-image-large:active,
+html body:has(.product-page-main) .product-image-large::before,
+html body:has(.product-page-main) .product-image-large::after {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 none transparent !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    outline: 0 none transparent !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
+/* Kill any decorative pseudo-element entirely (they were rendering as inner frames) */
+html body:has(.product-page-main) .product-grid-main::before,
+html body:has(.product-page-main) .product-grid-main::after,
+html body:has(.product-page-main) .product-media::before,
+html body:has(.product-page-main) .product-media::after,
+html body:has(.product-page-main) .product-image-large::before,
+html body:has(.product-page-main) .product-image-large::after {
+    content: none !important;
+    display: none !important;
+}
+/* Collapse padding and layout-only props on the wrappers */
+html body:has(.product-page-main) .product-grid-main,
+html body:has(.product-page-main) .product-media {
+    padding: 0 !important;
+}
+html body:has(.product-page-main) .product-image-large {
+    padding: 0 !important;
+    min-height: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+}
+html body:has(.product-page-main) .product-image-large img {
+    background: transparent !important;
+    border: 0 none transparent !important;
+    outline: 0 none transparent !important;
+    box-shadow: none !important;
+    filter: drop-shadow(0 22px 44px rgba(0,0,0,0.5)) !important;
+    border-radius: 0 !important;
+}
+/* The "Premium" verified badge had a 2px white border which read as another box — soften it */
+.product-badges .verified-badge {
+    border: none !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35) !important;
+}
+
+/* ---------- Hero media: zoom + lightbox affordance ---------- */
+.product-image-large { position: relative; overflow: visible !important; cursor: zoom-in; isolation: isolate; border-radius: 0 !important; }
+.product-image-large img { transition: transform .4s cubic-bezier(.2,.7,.2,1); will-change: transform; }
+@media (hover:hover) and (pointer:fine) {
+    .product-image-large:hover img { transform: scale(1.06); }
+}
+.pu-zoom-hint {
+    position: absolute; top: 12px; right: 12px; z-index: 4;
+    background: rgba(15,23,42,.78); color: #fff;
+    font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 6px 10px; border-radius: 999px;
+    backdrop-filter: blur(8px);
+    display: inline-flex; align-items: center; gap: 6px;
+    pointer-events: none;
+    opacity: 0; transform: translateY(-4px);
+    transition: opacity .2s, transform .2s;
+}
+.product-image-large:hover .pu-zoom-hint { opacity: 1; transform: translateY(0); }
+.pu-zoom-hint svg { width: 12px; height: 12px; }
+
+/* ---------- Lightbox ---------- */
+.pu-lightbox {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(2,6,23,.92);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    animation: pu-fade .2s ease-out;
+}
+.pu-lightbox.open { display: flex; }
+.pu-lightbox img { max-width: min(92vw, 900px); max-height: 86vh; border-radius: 14px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.pu-lightbox .pu-close {
+    position: absolute; top: 18px; right: 18px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,.12); color: #fff;
+    border: 1px solid rgba(255,255,255,.18);
+    display: grid; place-items: center; cursor: pointer;
+    transition: background .15s;
+}
+.pu-lightbox .pu-close:hover { background: rgba(255,255,255,.22); }
+@keyframes pu-fade { from { opacity: 0 } to { opacity: 1 } }
+
+/* ---------- Trust notes grid polish ---------- */
+.p-trust-notes {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 10px !important;
+    margin-top: 22px;
+}
+.p-trust-notes .tn-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, rgba(11,100,255,.06), rgba(124,58,237,.05));
+    border: 1px solid rgba(11,100,255,.18);
+    border-radius: 12px;
+    font-size: 13px; font-weight: 600; color: #1e293b;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.p-trust-notes .tn-item:hover { transform: translateY(-2px); border-color: rgba(11,100,255,.4); box-shadow: 0 8px 18px rgba(11,100,255,.12); }
+.p-trust-notes .tn-item i, .p-trust-notes .tn-item svg { width: 18px; height: 18px; color: #0b64ff; flex-shrink: 0; }
+
+/* ---------- Share row ---------- */
+.pu-share-row {
+    display: flex; align-items: center; gap: 8px;
+    margin: 18px 0 4px;
+    flex-wrap: wrap;
+}
+body:has(.product-page-main) .pu-share-row .pu-share-label,
+.pu-share-row .pu-share-label {
+    font-size: 12px; color: #cbd5e1 !important;
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+    margin-right: 4px;
+}
+body:has(.product-page-main) .pu-share-btn,
+.pu-share-btn {
+    appearance: none;
+    border: 1.5px solid rgba(191,219,254,.68) !important;
+    background: rgba(51,65,85,.98) !important;
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    width: 38px; height: 38px; border-radius: 10px;
+    display: grid; place-items: center; cursor: pointer;
+    transition: all .15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.08) !important;
+    opacity: 1 !important;
+}
+body:has(.product-page-main) .pu-share-btn:hover,
+.pu-share-btn:hover { transform: translateY(-2px); border-color: #93c5fd !important; color: #fff !important; background: rgba(37,99,235,.78) !important; box-shadow: 0 6px 14px rgba(11,100,255,.35) !important; }
+body:has(.product-page-main) .pu-share-btn svg,
+.pu-share-btn svg { width: 18px; height: 18px; display: block; fill: currentColor; stroke: currentColor; opacity: 1 !important; }
+.pu-share-btn[data-pu="copy"] svg { fill: none; }
+.pu-share-btn.copied { background: #16a34a; color: #fff; border-color: #16a34a; }
+
+/* Light-page fallback: if the share row sits on a light surface, swap to light theme */
+@media (prefers-color-scheme: light) {
+    body:not(.product-page-dark) .pu-share-btn {
+        background: #fff; color: #0f172a; border-color: rgba(15,23,42,.25);
+        box-shadow: 0 2px 6px rgba(15,23,42,.08);
+    }
+    body:not(.product-page-dark) .pu-share-row .pu-share-label { color: #475569; }
+}
+
+/* ---------- Quantity stepper ---------- */
+body:has(.product-page-main) .pu-qty-row,
+.pu-qty-row {
+    display: inline-flex; align-items: center; gap: 0;
+    border: 1.5px solid rgba(191,219,254,.68) !important;
+    border-radius: 12px; overflow: hidden;
+    margin-right: 12px;
+    height: 48px;
+    background: rgba(51,65,85,.98) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.08) !important;
+    opacity: 1 !important;
+}
+body:has(.product-page-main) .pu-qty-row button,
+.pu-qty-row button {
+    width: 40px; height: 100%;
+    background: transparent !important; border: none; cursor: pointer;
+    font-size: 18px; font-weight: 800; color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    transition: background .15s;
+    opacity: 1 !important;
+}
+body:has(.product-page-main) .pu-qty-row button:hover,
+.pu-qty-row button:hover { background: rgba(37,99,235,.72) !important; color: #fff !important; }
+body:has(.product-page-main) .pu-qty-row input,
+.pu-qty-row input {
+    width: 48px; height: 100%;
+    text-align: center; border: none; outline: none;
+    font-size: 15px; font-weight: 900; color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    background: rgba(15,23,42,.7) !important;
+    border-left: 1px solid rgba(191,219,254,.42) !important;
+    border-right: 1px solid rgba(191,219,254,.42) !important;
+    opacity: 1 !important;
+}
+
+/* Light-page fallback for qty stepper */
+@media (prefers-color-scheme: light) {
+    body:not(.product-page-dark) .pu-qty-row { background: #fff; border-color: rgba(15,23,42,.2); box-shadow: 0 2px 6px rgba(15,23,42,.08); }
+    body:not(.product-page-dark) .pu-qty-row button { color: #0f172a; }
+    body:not(.product-page-dark) .pu-qty-row button:hover { background: #e2e8f0; color: #0f172a; }
+    body:not(.product-page-dark) .pu-qty-row input { color: #0f172a; background: #f8fafc; border-color: rgba(15,23,42,.1); }
+}
+
+/* ---------- Sticky in-page tabs (scroll spy) ---------- */
+.product-tabs .tabs-header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(148,163,184,.2);
+    margin: 32px -16px 0;
+    padding: 0 16px;
+}
+.product-tabs .tab-btn {
+    position: relative;
+    transition: color .15s;
+}
+.product-tabs .tab-btn.active::after {
+    content: ""; position: absolute; left: 16%; right: 16%; bottom: -1px;
+    height: 3px; border-radius: 3px 3px 0 0;
+    background: linear-gradient(90deg, #0b64ff, #7c3aed);
+}
+
+/* ---------- FAQ accordion ---------- */
+.faq-list .faq-item {
+    border: 1px solid rgba(148,163,184,.25);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+}
+.faq-list .faq-item.open { border-color: rgba(11,100,255,.45); box-shadow: 0 6px 18px rgba(11,100,255,.08); }
+.faq-list .faq-q {
+    width: 100%; text-align: left;
+    appearance: none; border: none; background: transparent;
+    padding: 16px 48px 16px 18px; cursor: pointer;
+    font-weight: 700; font-size: 15px; color: #0f172a;
+    position: relative;
+}
+.faq-list .faq-q::after {
+    content: "+"; position: absolute; right: 18px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px; line-height: 1; font-weight: 400; color: #0b64ff;
+    transition: transform .25s;
+}
+.faq-list .faq-item.open .faq-q::after { content: "−"; transform: translateY(-50%) rotate(180deg); }
+.faq-list .faq-a {
+    max-height: 0; overflow: hidden;
+    transition: max-height .3s ease, padding .3s ease;
+    padding: 0 18px;
+    color: #475569; font-size: 14px; line-height: 1.6;
+}
+.faq-list .faq-item.open .faq-a { max-height: 600px; padding: 0 18px 16px; }
+
+/* ---------- Recently viewed strip ---------- */
+.pu-recent {
+    margin-top: 40px;
+    border-top: 1px solid rgba(148,163,184,.2);
+    padding-top: 28px;
+}
+.pu-recent h3 { font-size: 1.1rem; font-weight: 800; margin: 0 0 14px; color: #0f172a; }
+.pu-recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+.pu-recent-card {
+    display: block; padding: 12px;
+    border: 1px solid rgba(148,163,184,.25);
+    border-radius: 12px;
+    text-decoration: none; color: inherit;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+    background: #fff;
+}
+.pu-recent-card:hover { transform: translateY(-3px); border-color: #0b64ff; box-shadow: 0 10px 24px rgba(11,100,255,.1); }
+.pu-recent-card img { width: 100%; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 8px; }
+.pu-recent-card .pu-r-name { font-size: 12px; font-weight: 700; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pu-recent-card .pu-r-price { font-size: 13px; font-weight: 800; color: #0b64ff; margin-top: 4px; }
+
+/* ---------- Dark mode adaptions ---------- */
+@media (prefers-color-scheme: dark) {
+    body.product-page { background: #0b1220; color: #e2e8f0; }
+    .p-trust-notes .tn-item { background: linear-gradient(135deg, rgba(11,100,255,.14), rgba(124,58,237,.10)); color: #e2e8f0; border-color: rgba(96,165,250,.25); }
+    /* .pu-share-btn handled by base rule (visible on both schemes) */
+    /* .pu-qty-row handled by base rule (visible on both schemes) */
+    .product-tabs .tabs-header { background: rgba(15,23,42,.85); border-color: rgba(96,165,250,.18); }
+    .faq-list .faq-item { border-color: rgba(96,165,250,.18); }
+    .faq-list .faq-q { color: #e2e8f0; }
+    .faq-list .faq-a { color: #cbd5e1; }
+    .pu-recent { border-color: rgba(96,165,250,.18); }
+    .pu-recent h3 { color: #e2e8f0; }
+    .pu-recent-card { background: rgba(15,23,42,.5); border-color: rgba(96,165,250,.18); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 767px) {
+    .pu-share-row { justify-content: flex-start; }
+    .product-tabs .tabs-header { margin: 24px -14px 0; padding: 0 14px; overflow-x: auto; scrollbar-width: none; }
+    .product-tabs .tabs-header::-webkit-scrollbar { display: none; }
+    .product-tabs .tab-btn { white-space: nowrap; }
+
+    /* Trust notes were overlapping on narrow viewports: force single column
+       and let long labels wrap instead of bleeding into the next tile. */
+    .p-trust-notes {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+    .p-trust-notes .tn-item {
+        width: 100%;
+        min-width: 0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        font-size: 12.5px;
+        padding: 10px 12px;
+    }
+
+    /* Keep the lightbox image flush on small screens (no rounded corners) */
+    .pu-lightbox img { border-radius: 0; }
+}
+
+@media (max-width: 480px) {
+    .pu-qty-row { margin-right: 0; width: 100%; }
+    .pu-qty-row input { flex: 1; width: auto; }
+}
+
+/* ---------- Additional responsive breakpoints ----------
+   Prevent trust badges, hero image and qty stepper from overlapping
+   or clipping at narrow / awkward widths. */
+
+/* Tablet (768-1024): two trust columns max, contained image. */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .p-trust-notes {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    .p-trust-notes .tn-item { min-width: 0; }
+    .product-image-large, .product-media {
+        max-width: 100%;
+        margin-inline: auto;
+    }
+    .product-image-large img {
+        width: 100%;
+        height: auto;
+        max-height: 480px;
+        object-fit: contain;
+    }
+    .pu-qty-row { max-width: 220px; }
+}
+
+/* Small phone (<=600): keep media inside viewport, never horizontal-scroll. */
+@media (max-width: 600px) {
+    .product-grid-main,
+    .product-media,
+    .product-image-large {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+    }
+    .product-image-large {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .product-image-large img {
+        width: 100%;
+        max-width: 100%;
+        max-height: 60vw;
+        height: auto;
+        object-fit: contain;
+    }
+    .pu-zoom-hint { font-size: 11px; padding: 4px 8px; }
+    .pu-share-row { gap: 6px; }
+    .pu-share-btn { padding: 6px 10px; font-size: 12px; }
+}
+
+/* Extra-narrow (<=380): single qty stepper row, tighter trust tiles. */
+@media (max-width: 380px) {
+    .p-trust-notes .tn-item {
+        font-size: 12px;
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    .p-trust-notes .tn-item i,
+    .p-trust-notes .tn-item svg { width: 16px; height: 16px; }
+    .pu-qty-row { flex-wrap: nowrap; width: 100%; }
+    .pu-qty-row button { min-width: 40px; }
+    .pu-qty-row input { min-width: 0; width: 100%; }
+    .product-image-large img { max-height: 70vw; }
+}
+
+
+
+
+/* ============================================================
+   Product Upgrade v2 (2026-06-28) — Sticky buy bar + social proof
+   ============================================================ */
+
+/* ---------- Sticky buy bar ---------- */
+.pu-sticky-bar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    z-index: 920;
+    background: rgba(15,23,42,.97);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 -12px 36px rgba(0,0,0,.32);
+    transform: translateY(110%);
+    transition: transform .3s cubic-bezier(.2,.7,.2,1);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+}
+.pu-sticky-bar.visible { transform: translateY(0); }
+.pu-sb-inner {
+    display: grid;
+    grid-template-columns: 48px minmax(0,1fr) auto;
+    align-items: center;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+.pu-sb-thumb {
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    object-fit: contain;
+    background: #fff;
+    padding: 4px;
+}
+.pu-sb-meta { min-width: 0; }
+.pu-sb-name {
+    color: #f8fafc;
+    font-size: 13px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pu-sb-price {
+    color: #5eead4;
+    font-size: 16px; font-weight: 900;
+    margin-top: 2px;
+}
+.pu-sb-btn {
+    appearance: none; border: 0; cursor: pointer;
+    background: linear-gradient(135deg, #0b64ff, #7c3aed);
+    color: #fff; font-weight: 800;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: 0 8px 22px rgba(11,100,255,.4);
+    white-space: nowrap;
+}
+.pu-sb-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(11,100,255,.5); }
+body:has(.pu-sticky-bar.visible) { padding-bottom: 84px; }
+
+@media (min-width: 1024px) {
+    .pu-sticky-bar { padding: 12px 24px; }
+    .pu-sb-inner { max-width: 1080px; grid-template-columns: 56px minmax(0,1fr) auto; }
+    .pu-sb-thumb { width: 56px; height: 56px; }
+    .pu-sb-name { font-size: 15px; }
+}
+
+/* ---------- Social proof ---------- */
+.pu-proof {
+    margin: 28px 0 8px;
+    padding: 22px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(11,100,255,.05), rgba(124,58,237,.05));
+    border: 1px solid rgba(11,100,255,.15);
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 28px;
+    align-items: center;
+}
+.pu-prf-summary {
+    text-align: center;
+    border-right: 1px dashed rgba(15,23,42,.12);
+    padding-right: 20px;
+}
+.pu-prf-avg {
+    font-size: 48px; font-weight: 900;
+    background: linear-gradient(135deg, #0b64ff, #7c3aed);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    line-height: 1;
+}
+.pu-prf-avg span { font-size: 18px; color: rgba(15,23,42,.4); -webkit-text-fill-color: rgba(15,23,42,.4); }
+.pu-prf-stars { color: #f59e0b; font-size: 18px; letter-spacing: 2px; margin: 6px 0 4px; }
+.pu-prf-count { font-size: 12px; color: rgba(15,23,42,.6); font-weight: 600; }
+.pu-prf-bars { display: flex; flex-direction: column; gap: 6px; }
+.pu-prf-row { display: grid; grid-template-columns: 28px 1fr 36px; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: rgba(15,23,42,.7); }
+.pu-prf-bar { height: 8px; background: rgba(15,23,42,.08); border-radius: 999px; overflow: hidden; }
+.pu-prf-bar > span { display: block; height: 100%; background: linear-gradient(90deg, #f59e0b, #f97316); border-radius: 999px; transition: width .8s ease; }
+.pu-prf-pct { text-align: right; font-variant-numeric: tabular-nums; }
+
+.pu-ticker {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(16,185,129,.08);
+    border: 1px solid rgba(16,185,129,.25);
+    border-radius: 10px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600;
+    color: #047857;
+}
+.pu-ticker span#puTickerText { transition: opacity .22s ease; flex: 1; }
+.pu-tk-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 0 rgba(16,185,129,.6);
+    animation: pu-pulse 1.8s ease-out infinite;
+    flex-shrink: 0;
+}
+@keyframes pu-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16,185,129,.6); }
+    70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+    100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+
+@media (prefers-color-scheme: dark) {
+    .pu-proof { background: linear-gradient(135deg, rgba(11,100,255,.12), rgba(124,58,237,.10)); border-color: rgba(96,165,250,.22); }
+    .pu-prf-summary { border-right-color: rgba(255,255,255,.1); }
+    .pu-prf-avg span { color: rgba(226,232,240,.5); -webkit-text-fill-color: rgba(226,232,240,.5); }
+    .pu-prf-count { color: rgba(226,232,240,.65); }
+    .pu-prf-row { color: rgba(226,232,240,.75); }
+    .pu-prf-bar { background: rgba(255,255,255,.08); }
+}
+
+@media (max-width: 700px) {
+    .pu-proof { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+    .pu-prf-summary { border-right: none; border-bottom: 1px dashed rgba(15,23,42,.12); padding-right: 0; padding-bottom: 14px; }
+    .pu-prf-avg { font-size: 40px; }
+}

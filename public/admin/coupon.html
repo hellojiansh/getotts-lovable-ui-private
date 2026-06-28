@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+    <title> Coupon - GetOTTs Admin</title>
+    <link rel="icon" type="image/png" sizes="96x96" href="/admin-static/assets/images/favicon-96x96.png">
+    <style>
+        body { margin: 0; min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: #f4f7fb; color: #101827; display: grid; place-items: center; padding: 24px; }
+        .card { width: min(560px, 100%); background: #fff; border: 1px solid #d9e2ef; border-radius: 14px; box-shadow: 0 24px 70px rgba(15, 23, 42, .12); overflow: hidden; }
+        .head { padding: 22px 26px; border-bottom: 1px solid #e6edf6; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        h1 { margin: 0; font-size: 22px; }
+        .build { color: #64748b; font-size: 12px; }
+        form { padding: 24px 26px 26px; display: grid; gap: 16px; }
+        label { display: grid; gap: 7px; font-weight: 700; font-size: 13px; color: #334155; }
+        input, select { width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 13px; font: inherit; background: #fff; color: #0f172a; }
+        input:focus, select:focus { outline: 3px solid rgba(37, 99, 235, .18); border-color: #2563eb; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .check { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #334155; }
+        .check input { width: auto; }
+        .error { padding: 12px 14px; border-radius: 10px; background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; font-weight: 700; }
+        .actions { display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; }
+        .btn { border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 16px; font-weight: 800; text-decoration: none; color: #0f172a; background: #fff; cursor: pointer; }
+        .btn.primary { background: #2563eb; color: white; border-color: #2563eb; }
+        @media (max-width: 560px) { .row { grid-template-columns: 1fr; } .actions { flex-direction: column-reverse; } .btn { text-align: center; } }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="head">
+            <h1> Coupon</h1>
+            <span class="build"></span>
+        </div>
+        <form method="post">
+            
+            <div class="error"></div>
+            
+            <label>
+                Code
+                <input name="code" value="" placeholder="SAVE20" required style="text-transform:uppercase">
+            </label>
+            <label>
+                Discount Type
+                <select name="discount_type" id="discountType">
+                    <option value="percent" selected>Percentage (%)</option>
+                    <option value="fixed" selected>Fixed Amount</option>
+                </select>
+            </label>
+            <label>
+                Currency
+                <select name="currency" id="couponCurrency">
+                    <option value="INR" selected>Rs (INR)</option>
+                    <option value="USD" selected>$ (USD)</option>
+                    <option value="BOTH" selected>Both ($ + Rs)</option>
+                </select>
+            </label>
+            <div class="row">
+                <label id="percentField">
+                    Discount Percent
+                    <input name="discount_percent" value="" type="number" min="1" max="100" placeholder="20">
+                </label>
+                <label id="amountField">
+                    Discount Amount
+                    <input name="discount_amount" value="" type="number" min="1" step="0.01" placeholder="50">
+                </label>
+            </div>
+            <div class="row">
+                <label>
+                    Min Order (<span id="minOrderCurrencyLabel">Rs</span>)
+                    <input name="min_order" value="" type="number" min="0" step="0.01">
+                </label>
+                <label>
+                    Max Uses
+                    <input name="max_uses" value="" type="number" min="1">
+                </label>
+            </div>
+            <label>
+                Expires At
+                <input name="expires_at" value="" type="date">
+            </label>
+            <label class="check">
+                <input name="is_active" type="checkbox" checked>
+                Active coupon
+            </label>
+            <div class="actions">
+                <a class="btn" href="/adminno881/?tab=coupons">Back to Coupons</a>
+                <button class="btn primary" type="submit">Save Coupon</button>
+            </div>
+        </form>
+    </main>
+    <script>
+        const type = document.getElementById('discountType');
+        const percent = document.getElementById('percentField');
+        const amount = document.getElementById('amountField');
+        const currency = document.getElementById('couponCurrency');
+        const minOrderCurrencyLabel = document.getElementById('minOrderCurrencyLabel');
+        function syncFields() {
+            const fixed = type.value === 'fixed';
+            percent.style.display = fixed ? 'none' : 'grid';
+            amount.style.display = fixed ? 'grid' : 'none';
+            if (minOrderCurrencyLabel && currency) {
+                minOrderCurrencyLabel.textContent = currency.value === 'USD' ? '$' : (currency.value === 'BOTH' ? 'Rs base' : 'Rs');
+            }
+        }
+        type.addEventListener('change', syncFields);
+        currency.addEventListener('change', syncFields);
+        syncFields();
+    </script>
+    <script src="/admin-static/js/grammar-assist.js?v=20260518-writing1" defer></script>
+</body>
+</html>

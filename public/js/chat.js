@@ -156,6 +156,21 @@ class ChatWidget {
                 e.preventDefault();
                 this.sendMessage();
             });
+            // Persist composer draft across page navigations / panel close
+            const inputEl = document.getElementById('chatInput');
+            if (inputEl) {
+                try { inputEl.value = localStorage.getItem('getotts_chat_draft') || ''; } catch {}
+                inputEl.addEventListener('input', () => {
+                    try { localStorage.setItem('getotts_chat_draft', inputEl.value || ''); } catch {}
+                });
+            }
+            // Escape closes the panel when open
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.isOpen) {
+                    this.toggle(false);
+                    document.getElementById('chatToggleBtn')?.focus();
+                }
+            });
         }
     }
 
@@ -630,6 +645,7 @@ class ChatWidget {
         if (this.archiveMode) return;
         if (!text) return;
         input.value = '';
+        try { localStorage.removeItem('getotts_chat_draft'); } catch {}
 
         // Optimistic UI
         const tempMsg = { 

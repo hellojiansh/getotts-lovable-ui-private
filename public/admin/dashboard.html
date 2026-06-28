@@ -1,0 +1,2125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+    <meta name="description" content="GetOTTs Admin Dashboard &mdash; Manage orders, inventory, products, customers, and settings.">
+    <title>Admin Dashboard &mdash; GetOTTs</title>
+    <script>window.EXPECTED_ADMIN_BUILD = "";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <link rel="stylesheet" href="/admin-static/css/styles.css?v=20260503-v51">
+    <link rel="stylesheet" href="/admin-static/css/admin.v51.css?v=">
+    <style>
+        /* Essential layout overrides that aren't in the main CSS yet */
+        .action-cell { min-width: 200px; }
+        .audit-list { max-height: 300px; overflow-y: auto; }
+        .empty-hint { color: var(--text-muted); font-size: 0.85rem; padding: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- ========== VOUCHER MODAL ========== -->
+    <div class="modal-overlay" id="voucherModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center; backdrop-filter:blur(4px); pointer-events:auto !important;">
+        <div class="modal-card" style="max-width:400px; width:95%; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-main);">
+            <div class="modal-header">
+                <h2>Create Single Voucher</h2>
+                <button class="modal-close" onclick="closeModal('voucherModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="add-form">
+                    <div class="ck-field">
+                        <label>Voucher Amount</label>
+                        <input type="number" id="vchAmount" placeholder="100" min="1">
+                    </div>
+                    <div class="ck-field">
+                        <label>Currency</label>
+                        <select id="vchCurrency">
+                            <option value="INR">INR wallet (Rs)</option>
+                            <option value="USD">USD wallet ($)</option>
+                        </select>
+                    </div>
+                    <div class="ck-field">
+                        <label>Custom Code (Optional)</label>
+                        <input type="text" id="vchCode" placeholder="LEAVE BLANK FOR AUTO" style="text-transform:uppercase">
+                    </div>
+                    <div class="ck-field">
+                        <label>Usage Limit</label>
+                        <input type="number" id="vchLimit" value="1" min="1">
+                    </div>
+                    <div class="ck-field">
+                        <label>Expiry Date (Optional)</label>
+                        <input type="date" id="vchExpiry">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('voucherModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveVoucher()">
+                    <i data-lucide="save"></i> Create Voucher
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== BULK VOUCHER MODAL ========== -->
+    <div class="modal-overlay" id="bulkVoucherModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center; backdrop-filter:blur(4px); pointer-events:auto !important;">
+        <div class="modal-card" style="max-width:400px; width:95%; background: var(--bg-sidebar); border: 1px solid var(--border-color); color: var(--text-main);">
+            <div class="modal-header">
+                <h2>Bulk Generate Vouchers</h2>
+                <button class="modal-close" onclick="closeModal('bulkVoucherModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="add-form">
+                    <div class="ck-field">
+                        <label>Number of Vouchers</label>
+                        <input type="number" id="bulkVchCount" placeholder="10" min="1" max="500">
+                    </div>
+                    <div class="ck-field">
+                        <label>Amount Per Voucher</label>
+                        <input type="number" id="bulkVchAmount" placeholder="100" min="1">
+                    </div>
+                    <div class="ck-field">
+                        <label>Currency</label>
+                        <select id="bulkVchCurrency">
+                            <option value="INR">INR wallet (Rs)</option>
+                            <option value="USD">USD wallet ($)</option>
+                        </select>
+                    </div>
+                    <div class="ck-field">
+                        <label>Code Prefix</label>
+                        <input type="text" id="bulkVchPrefix" value="VCH" style="text-transform:uppercase">
+                    </div>
+                    <div class="ck-field">
+                        <label>Expiry Date (Optional)</label>
+                        <input type="date" id="bulkVchExpiry">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('bulkVoucherModal')">Cancel</button>
+                <button class="btn btn-primary" style="background:var(--gray-900)" onclick="generateBulkVouchers()">
+                    <i data-lucide="layers"></i> Generate Vouchers
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.openModal = window.openModal || function(id) {
+            var el = document.getElementById(id);
+            if (!el) return false;
+            el.classList.add('is-open');
+            el.removeAttribute('aria-hidden');
+            el.style.setProperty('display', 'flex', 'important');
+            el.style.setProperty('opacity', '1', 'important');
+            el.style.setProperty('visibility', 'visible', 'important');
+            el.style.setProperty('pointer-events', 'auto', 'important');
+            el.style.setProperty('position', 'fixed', 'important');
+            el.style.setProperty('inset', '0', 'important');
+            el.style.setProperty('z-index', '100000', 'important');
+            el.style.setProperty('align-items', 'center', 'important');
+            el.style.setProperty('justify-content', 'center', 'important');
+            return true;
+        };
+        window.closeModal = window.closeModal || function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('is-open');
+            el.setAttribute('aria-hidden', 'true');
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('opacity', '0', 'important');
+            el.style.setProperty('pointer-events', 'none', 'important');
+        };
+        window.showVoucherCreateModal = function() {
+            var code = document.getElementById('vchCode');
+            var amount = document.getElementById('vchAmount');
+            var currency = document.getElementById('vchCurrency');
+            var limit = document.getElementById('vchLimit');
+            var expiry = document.getElementById('vchExpiry');
+            if (code) code.value = '';
+            if (amount) amount.value = '';
+            if (currency) currency.value = 'INR';
+            if (limit) limit.value = '1';
+            if (expiry) expiry.value = '';
+            window.openModal('voucherModal');
+        };
+        window.showBulkGenerateModal = function() {
+            var count = document.getElementById('bulkVchCount');
+            var amount = document.getElementById('bulkVchAmount');
+            var currency = document.getElementById('bulkVchCurrency');
+            var prefix = document.getElementById('bulkVchPrefix');
+            var expiry = document.getElementById('bulkVchExpiry');
+            if (count) count.value = '10';
+            if (amount) amount.value = '100';
+            if (currency) currency.value = 'INR';
+            if (prefix) prefix.value = 'VCH';
+            if (expiry) expiry.value = '';
+            window.openModal('bulkVoucherModal');
+        };
+        window.showCouponModal = window.showCouponModal || function() {
+            var fields = {
+                couponEditId: '',
+                couponCode: '',
+                couponPercent: '',
+                couponAmount: '',
+                couponMinOrder: '0',
+                couponMaxUses: '1000',
+                couponExpiry: ''
+            };
+            Object.keys(fields).forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.value = fields[id];
+            });
+            var title = document.getElementById('couponModalTitle');
+            var type = document.getElementById('couponType');
+            var currency = document.getElementById('couponCurrency');
+            var percent = document.getElementById('couponPercentField');
+            var amount = document.getElementById('couponAmountField');
+            if (title) title.textContent = 'Create Coupon';
+            if (type) type.value = 'percent';
+            if (currency) currency.value = 'INR';
+            if (percent) percent.style.display = 'block';
+            if (amount) amount.style.display = 'none';
+            window.openModal('couponModal');
+        };
+    </script>
+
+
+
+
+    <!-- Dashboard -->
+    <div class="admin-dash" id="adminDash">
+        <div class="admin-mobile-overlay" onclick="toggleAdminSidebar(false)"></div>
+
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="logo" style="padding:20px; gap:12px; align-items:center;">
+                <img src="/admin-static/assets/images/logo-upgraded-20260603.png" alt="GetOTTs" style="height:32px; border-radius:8px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.3));">
+                <span class="logo-name" style="font-size:1.1rem; font-weight:800; background: linear-gradient(135deg, #fff 0%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Admin</span>
+            </div>
+            <nav class="admin-nav">
+                <a class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+                    <i data-lucide="layout-dashboard"></i> <span>Overview</span>
+                </a>
+                <a class="nav-item" data-tab="orders" onclick="switchTab('orders')">
+                    <i data-lucide="shopping-bag"></i> <span>Orders</span>
+                </a>
+                <a class="nav-item" data-tab="inbox" onclick="switchTab('inbox')">
+                    <i data-lucide="message-square"></i> <span>Admin Chat</span>
+                </a>
+                <a class="nav-item" data-tab="tickets" onclick="switchTab('tickets')">
+                    <i data-lucide="life-buoy"></i> <span>Tickets</span>
+                </a>
+                <a class="nav-item" data-tab="inventory" onclick="switchTab('inventory')">
+                    <i data-lucide="database"></i> <span>Inventory</span>
+                </a>
+                <a class="nav-item" data-tab="products" onclick="switchTab('products')">
+                    <i data-lucide="package"></i> <span>Products</span>
+                </a>
+                <a class="nav-item" data-tab="customers" onclick="switchTab('customers')">
+                    <i data-lucide="users"></i> <span>Customers</span>
+                </a>
+                <a class="nav-item" data-tab="coupons" onclick="switchTab('coupons')">
+                    <i data-lucide="ticket"></i> <span>Coupons</span>
+                </a>
+                <a class="nav-item" data-tab="blog" onclick="switchTab('blog')">
+                    <i data-lucide="file-text"></i> <span>Blog Posts</span>
+                </a>
+                <a class="nav-item" data-tab="whatsapp" onclick="switchTab('whatsapp')">
+                    <i data-lucide="message-circle"></i> <span>WhatsApp Hub</span>
+                </a>
+                <a class="nav-item" data-tab="add-inventory" onclick="switchTab('add-inventory')">
+                    <i data-lucide="plus-circle"></i> <span>Add Inventory</span>
+                </a>
+                <a class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+                    <i data-lucide="settings"></i> <span>Settings</span>
+                </a>
+                <a class="nav-item" data-tab="vouchers" onclick="switchTab('vouchers')">
+                    <i data-lucide="wallet"></i> <span>Wallet & Vouchers</span>
+                </a>
+            </nav>
+            <div class="admin-sidebar-footer">
+                <a href="/" class="nav-item">
+                    <i data-lucide="external-link"></i> <span>View Store</span>
+                </a>
+                <a class="nav-item" onclick="logout()">
+                    <i data-lucide="log-out"></i> <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- ========== TOP HEADER ========== -->
+            <header class="admin-header">
+                <button class="admin-icon-btn admin-mobile-menu-btn" type="button" onclick="toggleAdminSidebar(true)" title="Open menu">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="header-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="globalSearch" placeholder="Search orders, customers, products..." oninput="debounceGlobalSearch()">
+                </div>
+                <div class="header-actions">
+                    <button class="admin-icon-btn" type="button" onclick="toggleAdminTheme()" title="Toggle dark mode">
+                        <i id="themeToggleIcon" data-lucide="moon"></i>
+                        <span id="themeToggleLabel">Dark</span>
+                    </button>
+                    <button class="admin-icon-btn" type="button" onclick="openAdminAppearance()" title="Customize admin look">
+                        <i data-lucide="palette"></i>
+                    </button>
+                    <div class="status-indicators">
+                        <div class="status-pill" id="waStatusPill">
+                            <span class="status-dot offline"></span>
+                            <span class="status-text">WhatsApp: Offline</span>
+                        </div>
+                    </div>
+                    <div class="admin-profile">
+                        <div class="profile-info">
+                            <span class="profile-name">Mukund Agarwal</span>
+                            <span class="profile-role">Super Admin</span>
+                        </div>
+                        <div class="profile-avatar">MA</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ========== OVERVIEW TAB ========== -->
+            <section class="admin-tab active" id="tab-overview">
+                <h1>Dashboard Overview</h1>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div>
+                            <span class="stat-label">Total Revenue</span>
+                            <strong class="stat-value" id="statRevenue">Rs0 / $0.00</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-color: var(--danger);">
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                            <i data-lucide="zap"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <span class="stat-label">System State</span>
+                            <button class="action-btn red" onclick="factoryResetAdmin()" style="width:100%; border-radius:8px; padding:6px; font-size:0.8rem; margin-top:4px;">
+                                <i data-lucide="refresh-cw"></i> Factory Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">
+                            <i data-lucide="shopping-bag"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Total Orders</span>
+                            <strong class="stat-value" id="statOrders">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                            <i data-lucide="database"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Available Stock</span>
+                            <strong class="stat-value" id="statStock">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Customers</span>
+                            <strong class="stat-value" id="statCustomers">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Row -->
+                <div class="stats-grid" style="margin-top:12px">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#dcfce7;color:#16a34a">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Paid Orders</span>
+                            <strong class="stat-value" id="statPaid">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(234, 179, 8, 0.1); color: #eab308;">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Pending</span>
+                            <strong class="stat-value" id="statPending">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+                            <i data-lucide="truck"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Delivered</span>
+                            <strong class="stat-value" id="statDelivered">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(124, 58, 237, 0.1); color: #7c3aed;">
+                            <i data-lucide="package"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Total Inventory</span>
+                            <strong class="stat-value" id="statTotalInv">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card admin-ops-card" style="margin-top:24px; background: var(--bg-card) !important;">
+                    <div class="admin-card-head">
+                        <div>
+                            <h3>Operations Hub</h3>
+                            <p>Jump straight to the connected work area instead of hunting through the sidebar.</p>
+                        </div>
+                    </div>
+                    <div class="admin-ops-grid">
+                        <button class="admin-ops-tile" onclick="switchTab('orders')">
+                            <i data-lucide="truck"></i>
+                            <span>Orders & Delivery</span>
+                            <small>Payments, delivery, refunds</small>
+                        </button>
+                        <button class="admin-ops-tile" onclick="switchTab('products')">
+                            <i data-lucide="package"></i>
+                            <span>Products & Pricing</span>
+                            <small>Plans, region, how-to-use</small>
+                        </button>
+                        <button class="admin-ops-tile" onclick="switchTab('inventory')">
+                            <i data-lucide="database"></i>
+                            <span>Inventory</span>
+                            <small>Accounts, stock, assignment</small>
+                        </button>
+                        <button class="admin-ops-tile" onclick="switchTab('whatsapp')">
+                            <i data-lucide="message-circle"></i>
+                            <span>WhatsApp Hub</span>
+                            <small>OTP, support, broadcast</small>
+                        </button>
+                        <button class="admin-ops-tile" onclick="switchTab('coupons')">
+                            <i data-lucide="ticket"></i>
+                            <span>Coupons & Vouchers</span>
+                            <small>Offers and wallet credits</small>
+                        </button>
+                        <button class="admin-ops-tile" onclick="openAdminAppearance()">
+                            <i data-lucide="palette"></i>
+                            <span>Admin Look</span>
+                            <small>Dark mode, density, sidebar</small>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="admin-card" style="margin-top:16px; background: var(--bg-card) !important;">
+                    <h3>Recent Activity</h3>
+                    <div id="auditLogPreview" class="audit-list">
+                        <p class="empty-hint">No activity yet</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== ORDERS TAB ========== -->
+            <section class="admin-tab" id="tab-orders">
+                <div class="tab-header">
+                    <h1>Orders</h1>
+                    <div class="tab-filters">
+                        <select id="orderFilter" onchange="loadOrders({force:true, resetPage:true})">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="paid">Paid</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="failed">Failed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                        <input type="text" id="orderSearch" placeholder="Search orders..." class="admin-search-input">
+                        <button class="btn btn-outline" onclick="loadOrders({force:true, resetPage:true})">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-pagination" id="ordersPagination"></div>
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table" id="ordersTable">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Amount</th>
+                                    <th>Payment</th>
+                                    <th>Delivery</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersBody">
+                                <tr><td colspan="8" class="empty-state">No orders yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== INVENTORY TAB ========== -->
+            <section class="admin-tab" id="tab-inventory">
+                <div class="tab-header">
+                    <h1>Inventory</h1>
+                    <div class="tab-filters">
+                        <select id="invFilter" onchange="loadInventory({force:true, resetPage:true})">
+                            <option value="">All</option>
+                            <option value="available">Available</option>
+                            <option value="reserved">Reserved</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="expired">Expired</option>
+                            <option value="flagged">Flagged</option>
+                        </select>
+                        <input type="text" id="invSearch" placeholder="Search inventory..." class="admin-search-input">
+                        <button class="btn btn-outline" onclick="loadInventory({force:true, resetPage:true})">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                        <button class="btn btn-primary" onclick="syncInventoryToCloud()" style="margin-left:8px">
+                            <i data-lucide="cloud-upload"></i> Sync to Cloud
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-pagination" id="inventoryPagination"></div>
+
+                <!-- Stock Summary -->
+                <div class="admin-card" style="margin-bottom:16px; padding:16px;">
+                    <h3 style="margin:0 0 12px; font-size:.9rem; color:var(--gray-500); text-transform:uppercase; letter-spacing:.05em;">Stock Summary</h3>
+                    <div id="stockSummary" style="display:flex; flex-wrap:wrap; gap:8px;">
+                        <p style="color:#9ca3af; font-size:.85rem;">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table" id="invTable">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Platform</th>
+                                    <th>Plan</th>
+                                    <th>Status</th>
+                                    <th>Order</th>
+                                    <th>Expiry</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invBody">
+                                <tr><td colspan="7" class="empty-state">Loading inventory...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== PRODUCTS TAB ========== -->
+            <section class="admin-tab" id="tab-products">
+                <div class="tab-header">
+                    <h1>Products (Catalog)</h1>
+                    <div class="tab-filters">
+                        <input type="text" id="productSearch" placeholder="Search products..." class="admin-search-input">
+                        <button class="btn btn-outline" style="border-color:var(--orange-400); color:var(--orange-500);" onclick="runCatalogMigration()">
+                            <i data-lucide="cloud-lightning"></i> Full Rebuild
+                        </button>
+                        <button class="btn primary-btn" onclick="openProductWizard()">
+                            <i data-lucide="plus"></i> Create New Product
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-card top-deals-manager-card" id="topDealsManagerCard">
+                    <div class="top-deals-manager-head">
+                        <div>
+                            <div class="section-kicker"><i data-lucide="badge-percent"></i> Top Deals Manager</div>
+                            <h2>Market-aware promoted products</h2>
+                            <p>Choose up to 6 manual slots per market. Empty space auto-fills using paid sales, discount, and product opens.</p>
+                        </div>
+                        <div class="top-deals-market-switch" role="tablist" aria-label="Top deals market">
+                            <button type="button" class="active" id="topDealsMarketIndia" onclick="switchTopDealsMarket('india')">
+                                <i data-lucide="map-pin"></i> India
+                            </button>
+                            <button type="button" id="topDealsMarketGlobal" onclick="switchTopDealsMarket('global')">
+                                <i data-lucide="globe-2"></i> Global
+                            </button>
+                        </div>
+                    </div>
+                    <div class="top-deals-manager-tools">
+                        <label class="admin-toggle-row">
+                            <input type="checkbox" id="topDealsAutoFill" checked>
+                            <span>Auto-fill empty slots</span>
+                        </label>
+                        <label class="top-deals-days">
+                            Sales window
+                            <input type="number" id="topDealsWindowDays" min="1" max="180" value="30">
+                            <span>days</span>
+                        </label>
+                        <button type="button" class="btn btn-outline" onclick="previewTopDealsManager()">
+                            <i data-lucide="eye"></i> Preview
+                        </button>
+                        <button type="button" class="btn primary-btn" onclick="saveTopDealsManager()">
+                            <i data-lucide="save"></i> Save Top Deals
+                        </button>
+                    </div>
+                    <div class="top-deals-manager-grid">
+                        <div>
+                            <div class="top-deals-slot-head">
+                                <span>Ordered slots</span>
+                                <small id="topDealsEligibilityText">Loading products...</small>
+                            </div>
+                            <div class="top-deals-slot-list" id="topDealsSlotList">
+                                <div class="empty-state">Loading Top Deals Manager...</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="top-deals-slot-head">
+                                <span>Storefront preview</span>
+                                <small>Manual first, auto-fill after</small>
+                            </div>
+                            <div class="top-deals-preview-grid" id="topDealsPreviewGrid">
+                                <div class="empty-state">Preview will appear here.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="top-deals-manager-note" id="topDealsManagerMessage">
+                        India uses Global + India products. Global uses Global products only, so India-only products never leave blank holes overseas.
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table" id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Plan</th>
+                                    <th>Shared INR / USD</th>
+                                    <th>Personal INR / USD</th>
+                                    <th>Stock</th>
+                                    <th>Featured</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsBody">
+                                <tr><td colspan="7" class="empty-state">Loading products...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== CUSTOMERS TAB ========== -->
+            <section class="admin-tab" id="tab-customers">
+                <div class="tab-header">
+                    <h1>Customers</h1>
+                    <div class="tab-filters customer-filterbar">
+                        <input type="search" id="customerSearch" placeholder="Search name, email, phone..." class="customer-search">
+                        <select id="customerOrderFilter" onchange="resetCustomerPagination()">
+                            <option value="all">All orders</option>
+                            <option value="with">With orders</option>
+                            <option value="without">No orders</option>
+                        </select>
+                        <select id="customerWalletFilter" onchange="resetCustomerPagination()">
+                            <option value="all">All wallets</option>
+                            <option value="positive">Wallet balance</option>
+                            <option value="empty">No wallet</option>
+                        </select>
+                        <select id="customerJoinedFilter" onchange="resetCustomerPagination()">
+                            <option value="all">Joined anytime</option>
+                            <option value="1">Joined today</option>
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                        </select>
+                        <select id="customerDeviceFilter" onchange="resetCustomerPagination()">
+                            <option value="all">All devices</option>
+                            <option value="available">Device available</option>
+                            <option value="missing">Device missing</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="loadCustomers({force:true, resetPage:true})">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="customer-summary-grid" id="customerSummaryCards"></div>
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Name</th>
+                                    <th>Email / Phone</th>
+                                    <th>Device</th>
+                                    <th>Location</th>
+                                    <th>Orders</th>
+                                    <th>Total Spent</th>
+                                    <th>Wallet Balance</th>
+                                    <th>Joined At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customersBody">
+                                <tr><td colspan="10" class="empty-state">No customers yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="customer-pagination-bar">
+                        <label>
+                            Rows per page
+                            <select id="customerRowsPerPage" onchange="resetCustomerPagination()">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </label>
+                        <div id="customerPagination"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== BLOG TAB ========== -->
+            <section class="admin-tab" id="tab-blog">
+                <div class="tab-header">
+                    <h1>Blog Management</h1>
+                    <div class="tab-filters">
+                        <input type="text" id="blogSearch" placeholder="Search posts..." class="admin-search-input">
+                        <button class="btn primary-btn" onclick="showBlogModal()">
+                            <i data-lucide="plus"></i> Create New Post
+                        </button>
+                        <button class="btn btn-outline" onclick="loadBlogs({force:true, resetPage:true})">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-pagination" id="blogPagination"></div>
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Views</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blogBody">
+                                <tr><td colspan="6" class="empty-state">Loading blog posts...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== COUPONS TAB ========== -->
+            <section class="admin-tab" id="tab-coupons">
+                <div class="tab-header">
+                    <h1>Coupons</h1>
+                    <div class="tab-filters">
+                        <input type="text" id="couponSearch" placeholder="Search coupons..." class="admin-search-input">
+                        <button class="btn btn-outline" onclick="loadCoupons({force:true, resetPage:true})">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                        <a class="btn primary-btn" href="/adminno881/coupons/new" onclick="showCouponModal(); return false;">
+                            <i data-lucide="plus"></i> Create Coupon
+                        </a>
+                    </div>
+                </div>
+                <div class="admin-pagination" id="couponsPagination"></div>
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Min Order</th>
+                                    <th>Max Uses</th>
+                                    <th>Used</th>
+                                    <th>Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="couponsBody">
+                                <tr><td colspan="7" class="empty-state">Loading coupons...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-tab" id="tab-add-inventory">
+                <div class="tab-header">
+                    <h1>Add New Inventory</h1>
+                    <p style="color:var(--gray-500); font-size:0.9rem;">Add single accounts or bulk upload credentials to your catalog.</p>
+                </div>
+
+                <div class="inventory-management-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(400px, 1fr)); gap:24px; align-items:start;">
+                    <!-- Single Add -->
+                    <div class="admin-card" style="height:100%">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--gray-50)">
+                            <div style="width:36px; height:36px; border-radius:10px; background:var(--blue-50); color:var(--blue-600); display:flex; align-items:center; justify-content:center;">
+                                <i data-lucide="user-plus" style="width:20px; height:20px"></i>
+                            </div>
+                            <h3 style="margin:0">Add Single Account</h3>
+                        </div>
+
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label for="addPlatform">Select Platform</label>
+                                <select id="addPlatform"></select>
+                            </div>
+                            <div class="grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                                <div class="ck-field">
+                                    <label for="addPlan">Plan Type</label>
+                                    <select id="addPlan">
+                                        <option value="shared">Shared</option>
+                                        <option value="personal">Personal</option>
+                                        <option value="family">Family</option>
+                                    </select>
+                                </div>
+                                <div class="ck-field">
+                                    <label for="addExpiry">Expiry Date</label>
+                                    <input type="date" id="addExpiry">
+                                </div>
+                            </div>
+                            <div class="ck-field">
+                                <label for="addEmail">Account Email / Username</label>
+                                <input type="email" id="addEmail" placeholder="e.g., netflix-premium-1@gmail.com">
+                            </div>
+                            <div class="ck-field">
+                                <label for="addPassword">Account Password</label>
+                                <input type="text" id="addPassword" placeholder="Enter password">
+                            </div>
+
+                            <button class="btn btn-primary" id="addInvBtn" onclick="addInventory()" style="width:100%; justify-content:center; padding:14px; margin-top:8px">
+                                <i data-lucide="plus"></i> Confirm & Add Account
+                            </button>
+                            <div id="addResult" class="add-result"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Add -->
+                    <div class="admin-card" style="height:100%">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--gray-50)">
+                            <div style="width:36px; height:36px; border-radius:10px; background:var(--orange-50); color:var(--orange-600); display:flex; align-items:center; justify-content:center;">
+                                <i data-lucide="layers" style="width:20px; height:20px"></i>
+                            </div>
+                            <h3 style="margin:0">Bulk Import Accounts</h3>
+                        </div>
+
+                        <p style="font-size:.82rem; color:var(--gray-500); margin-bottom:20px; padding:12px; background:var(--gray-50); border-radius:8px; border-left:3px solid var(--orange-400)">
+                            <strong>Format:</strong> One account per line: <code>email:password</code>. <br>
+                            <span style="font-size:0.75rem">Note: Bulk add defaults to <strong>Shared</strong> plan.</span>
+                        </p>
+
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label for="bulkPlatform">Select Platform</label>
+                                <select id="bulkPlatform"></select>
+                            </div>
+                            <div class="ck-field">
+                                <label for="bulkAccounts">Paste Credentials List</label>
+                                <textarea id="bulkAccounts" rows="10" placeholder="user1@example.com:pass123&#10;user2@example.com:pass456" style="width:100%; padding:14px; border:1px solid var(--gray-200); border-radius:var(--radius); font-family:monospace; font-size:.85rem; resize:vertical; background:white;"></textarea>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="bulkAddInventory()" style="width:100%; justify-content:center; padding:14px; margin-top:8px; background:var(--gray-900);">
+                                <i data-lucide="upload"></i> Process Bulk Upload
+                            </button>
+                            <div id="bulkResult" class="add-result"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== INBOX (LIVE CHAT) TAB ========== -->
+            <section class="admin-tab" id="tab-inbox">
+                <div class="tab-header">
+                    <h1>Live Support Inbox</h1>
+                    <button class="btn btn-outline" onclick="ADMIN_SUPPORT.loadInbox()">
+                        <i data-lucide="refresh-cw"></i> Refresh
+                    </button>
+                </div>
+                <div style="display:flex; gap:20px; height:600px;">
+                    <!-- Session List -->
+                    <div class="admin-card" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                        <h3 style="padding:16px; margin:0; border-bottom:1px solid var(--gray-100);">Active Chats</h3>
+                        <div id="inboxSessionList" style="flex:1; overflow-y:auto;">
+                            <div class="empty-state">Loading sessions...</div>
+                        </div>
+                    </div>
+                    <!-- Chat Window -->
+                    <div class="admin-card" style="flex:2; display:flex; flex-direction:column; overflow:hidden;">
+                        <div id="inboxChatHeader" style="padding:16px; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; gap:12px;">
+                            <div style="width:40px; height:40px; background:var(--gray-200); border-radius:50%; display:flex; align-items:center; justify-content:center;"><i data-lucide="user"></i></div>
+                            <div style="flex:1;">
+                                <h3 id="inboxActiveName" style="margin:0;">Select a conversation</h3>
+                                <span id="inboxActiveContact" style="font-size:0.8rem; color:var(--gray-500);">---</span>
+                            </div>
+                            <div id="inboxCloseContainer" style="display:none; align-items:center; gap:8px;">
+                                <button class="btn btn-outline btn-sm" onclick="ADMIN_SUPPORT.closeChat()" style="color:#ef4444; border-color:#fca5a5;">
+                                    <i data-lucide="x-circle"></i> Close Chat
+                                </button>
+                            </div>
+                        </div>
+                        <div id="inboxChatMessages" style="flex:1; overflow-y:auto; padding:20px; background:var(--gray-50); display:flex; flex-direction:column; gap:12px;">
+                            <div class="empty-state">No chat selected</div>
+                        </div>
+                        <form id="inboxReplyForm" onsubmit="ADMIN_SUPPORT.sendReply(event)" style="padding:16px; border-top:1px solid var(--gray-100); display:flex; gap:12px;">
+                            <input type="text" id="inboxReplyInput" class="form-input" style="flex:1;" placeholder="Type a message..." disabled>
+                            <button type="submit" class="btn btn-primary" id="inboxReplyBtn" disabled>Send</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== TICKETS TAB ========== -->
+            <section class="admin-tab" id="tab-tickets">
+                <div class="tab-header">
+                    <h1>Support Tickets</h1>
+                    <div class="tab-filters">
+                        <select id="adminTicketStatusFilter" onchange="ADMIN_SUPPORT.loadTickets()">
+                            <option value="">All Tickets</option>
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="ADMIN_SUPPORT.loadTickets()">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <div class="table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket #</th>
+                                    <th>Customer</th>
+                                    <th>Subject</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTicketsBody">
+                                <tr><td colspan="7" class="empty-state">Loading tickets...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== SETTINGS TAB ========== -->
+            <section class="admin-tab" id="tab-settings">
+                <h1>Settings</h1>
+                <div class="settings-grid">
+                    <div class="admin-card admin-customizer-card" id="adminAppearanceCard">
+                        <h3>Admin Look & Workflow</h3>
+                        <div class="admin-ui-preview" id="adminUiPreview"></div>
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label>Theme</label>
+                                <select id="adminUiTheme" onchange="updateAdminUiPref('theme', this.value)">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="soft">Soft</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Accent</label>
+                                <select id="adminUiAccent" onchange="updateAdminUiPref('accent', this.value)">
+                                    <option value="green">Green</option>
+                                    <option value="blue">Blue</option>
+                                    <option value="purple">Purple</option>
+                                    <option value="gold">Gold</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Density</label>
+                                <select id="adminUiDensity" onchange="updateAdminUiPref('density', this.value)">
+                                    <option value="comfortable">Comfortable</option>
+                                    <option value="compact">Compact</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Sidebar</label>
+                                <select id="adminUiSidebar" onchange="updateAdminUiPref('sidebar', this.value)">
+                                    <option value="full">Full labels</option>
+                                    <option value="compact">Compact icons</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Text Size</label>
+                                <select id="adminUiFontSize" onchange="updateAdminUiPref('fontSize', this.value)">
+                                    <option value="normal">Normal</option>
+                                    <option value="large">Large</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Corners</label>
+                                <select id="adminUiCorners" onchange="updateAdminUiPref('corners', this.value)">
+                                    <option value="soft">Soft</option>
+                                    <option value="sharp">Sharp</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" type="button" onclick="resetAdminUiPrefs()" style="margin-top:12px;">
+                            <i data-lucide="rotate-ccw"></i> Reset Look
+                        </button>
+                    </div>
+
+                    <div class="admin-card">
+                        <h3>Store Settings</h3>
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label>Site Name</label>
+                                <input type="text" id="setSiteName" value="GetOTTs">
+                            </div>
+                            <div class="ck-field">
+                                <label>Support Email</label>
+                                <input type="email" id="setSupportEmail" value="support@getotts.com">
+                            </div>
+                            <div class="ck-field">
+                                <label>WhatsApp Number</label>
+                                <input type="text" id="setWhatsApp" placeholder="919088212294">
+                            </div>
+                            <div class="ck-field">
+                                <label>Admin Notification Number <span style="font-size:.75rem;color:var(--gray-400)">(all orders/alerts forwarded here)</span></label>
+                                <input type="text" id="setAdminNotifyNumber" placeholder="919088212294">
+                            </div>
+                            <div class="ck-field">
+                                <label>Instagram</label>
+                                <input type="text" id="setInstagram" value="@getotts">
+                            </div>
+                            <div class="ck-field">
+                                <!-- Removed Telegram -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card">
+                        <h3>Payment Settings</h3>
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label>PayGate URL</label>
+                                <input type="text" id="setPaygateUrl" value="http://localhost:3000">
+                            </div>
+                            <div class="ck-field">
+                                <label>PayGate API Key</label>
+                                <input type="password" id="setPaygateKey" placeholder="********">
+                            </div>
+                            <div class="ck-field">
+                                <label>Default UPI ID</label>
+                                <input type="text" id="setUpi" placeholder="yourupi@bank">
+                            </div>
+                            <div class="ck-field">
+                                <label>Currency</label>
+                                <select id="setCurrency">
+                                    <option value="INR">INR (&#8377;)</option>
+                                    <option value="USD">USD ($)</option>
+                                </select>
+                            </div>
+                            <div class="ck-field" style="grid-column: span 2;">
+                                <label>Google Gemini AI API Key (for Magic Features)</label>
+                                <input type="password" id="setGeminiKey" placeholder="AIzaSy...">
+                                <small style="color:var(--text-muted);">Get yours from Google AI Studio</small>
+                            </div>
+                            <div class="ck-field" style="grid-column: span 2;">
+                                <label>Support AI Instructions</label>
+                                <textarea id="setSupportAiInstructions" rows="6" placeholder="Example: Be brief, never promise refunds or delivery changes, ask admin for OTP/manual delivery issues." style="width:100%;padding:12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-family:var(--font-body);font-size:.85rem;resize:vertical"></textarea>
+                                <small style="color:var(--text-muted);">Used by website chat and WhatsApp AI replies. Keep staff-only rules here.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card">
+                        <h3>Email Settings (ForwardEmail)</h3>
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label>SMTP Host</label>
+                                <input type="text" id="setSmtpHost" value="smtp.forwardemail.net">
+                            </div>
+                            <div class="ck-field">
+                                <label>SMTP Port</label>
+                                <input type="text" id="setSmtpPort" value="587">
+                            </div>
+                            <div class="ck-field">
+                                <label>SMTP User</label>
+                                <input type="email" id="setSmtpUser" value="support@getotts.com">
+                            </div>
+                            <div class="ck-field">
+                                <label>SMTP Password</label>
+                                <input type="password" id="setSmtpPass" placeholder="********">
+                            </div>
+                            <div class="ck-field">
+                                <label>From Name</label>
+                                <input type="text" id="setSmtpFromName" value="GetOTTs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-card">
+                        <h3>Auto-Delivery</h3>
+                        <div class="add-form">
+                            <div class="ck-field">
+                                <label>Auto-deliver on payment</label>
+                                <select id="setAutoDeliver">
+                                    <option value="true">Enabled</option>
+                                    <option value="false">Disabled</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Delivery Method</label>
+                                <select id="setDeliveryMethod">
+                                    <option value="email">Email Only</option>
+                                    <option value="whatsapp">WhatsApp Only</option>
+                                    <option value="both">Email + WhatsApp</option>
+                                    <option value="manual">Manual</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()" style="margin-top:20px">
+                    <i data-lucide="save"></i> Save All Settings
+                </button>
+                <div id="settingsResult" class="add-result" style="margin-top:8px"></div>
+            </section>
+
+            <!-- ========== WHATSAPP TAB ========== -->
+            <section class="admin-tab" id="tab-whatsapp">
+                <div class="tab-header">
+                    <h1>WhatsApp Hub</h1>
+                    <div class="tab-filters" style="gap:10px">
+                        <span id="waConnectionBadge" class="pill pill-pending" style="font-size:.8rem;padding:6px 14px">
+                            Checking...
+                        </span>
+                        <button class="btn btn-outline" onclick="restartWaMonitor()" style="color:#ef4444; border-color:#fca5a5;">
+                            <i data-lucide="refresh-cw"></i> Restart Service
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshWaHub()" style="background:#25D366">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Web Setup Card -->
+                <div class="admin-card" id="waSetupCard" style="margin-bottom:20px;border:2px solid #25D366">
+                    <h3 style="display:flex;align-items:center;gap:10px">
+                        <svg viewBox="0 0 24 24" fill="#25D366" style="width:24px;height:24px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WhatsApp Web Connection
+                    </h3>
+                    <div id="waSetupContent">
+                        <div style="text-align:center;padding:20px">
+                            <div class="empty-hint">Connecting to WhatsApp Monitor...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Verify Toggle -->
+                <div class="admin-card" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <h3 style="margin-bottom:4px">Auto-Verify Mode</h3>
+                        <p style="font-size:.8rem;color:var(--gray-400);margin:0">
+                            When enabled, login codes are verified automatically &mdash; no manual clicks needed.
+                        </p>
+                    </div>
+                    <label class="wa-toggle">
+                        <input type="checkbox" id="waAutoVerifyToggle" checked onchange="toggleAutoVerify(this.checked)">
+                        <span class="wa-toggle-slider"></span>
+                    </label>
+                </div>
+
+
+                <!-- WA Stats Row -->
+                <div class="stats-grid" id="waStatsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:rgba(37,211,102,.12);color:#25D366">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Pending Codes</span>
+                            <strong class="stat-value" id="waPendingCount">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#dcfce7;color:#16a34a">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Verified Today</span>
+                            <strong class="stat-value" id="waVerifiedCount">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#dbeafe;color:#2563eb">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Active Sessions</span>
+                            <strong class="stat-value" id="waActiveCount">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#fef3c7;color:#d97706">
+                            <i data-lucide="send"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Messages Sent</span>
+                            <strong class="stat-value" id="waMessagesCount">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wa-command-grid">
+                    <div class="admin-card wa-command-card">
+                        <div class="wa-card-head">
+                            <div>
+                                <h3>Customer WhatsApp Chat</h3>
+                                <p>Send a direct support, renewal, coupon, or custom message to one customer.</p>
+                            </div>
+                            <i data-lucide="message-circle"></i>
+                        </div>
+                        <div class="wa-compose-grid">
+                            <div class="ck-field">
+                                <label for="waDirectCustomer">Customer</label>
+                                <select id="waDirectCustomer" onchange="fillWaDirectPhoneFromCustomer()">
+                                    <option value="">Choose customer...</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label for="waDirectPhone">Phone</label>
+                                <input type="text" id="waDirectPhone" placeholder="91XXXXXXXXXX">
+                            </div>
+                            <div class="ck-field">
+                                <label for="waDirectTemplate">Template</label>
+                                <select id="waDirectTemplate" onchange="applyWaTemplate('direct')">
+                                    <option value="custom">Custom</option>
+                                    <option value="coupon">Coupon / Offer</option>
+                                    <option value="renewal">Renewal Reminder</option>
+                                    <option value="support">Support Follow-up</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label for="waDirectCampaign">Header</label>
+                                <input type="text" id="waDirectCampaign" placeholder="Optional title">
+                            </div>
+                            <div class="ck-field wa-full">
+                                <label for="waDirectMessage">Message</label>
+                                <textarea id="waDirectMessage" rows="5" placeholder="Write the WhatsApp message..."></textarea>
+                            </div>
+                        </div>
+                        <div class="wa-action-row">
+                            <button class="btn btn-outline" onclick="previewWaDirectMessage()">
+                                <i data-lucide="eye"></i> Preview
+                            </button>
+                            <button class="btn btn-primary" onclick="sendWaDirectCustomerMessage()" style="background:#25D366">
+                                <i data-lucide="send"></i> Send Message
+                            </button>
+                        </div>
+                        <div id="waDirectResult" class="wa-preview-box"></div>
+                    </div>
+
+                    <div class="admin-card wa-command-card">
+                        <div class="wa-card-head">
+                            <div>
+                                <h3>Broadcast / Advertisement</h3>
+                                <p>Preview and send an offer or announcement to selected customers with phone numbers.</p>
+                            </div>
+                            <i data-lucide="megaphone"></i>
+                        </div>
+                        <div class="wa-compose-grid">
+                            <div class="ck-field">
+                                <label for="waBroadcastSegment">Send To</label>
+                                <select id="waBroadcastSegment" onchange="loadWaMarketingCustomers()">
+                                    <option value="all">All customers with phone</option>
+                                    <option value="whatsapp">WhatsApp login customers</option>
+                                    <option value="buyers">Customers with orders</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label for="waBroadcastTemplate">Template</label>
+                                <select id="waBroadcastTemplate" onchange="applyWaTemplate('broadcast')">
+                                    <option value="coupon">Coupon / Offer</option>
+                                    <option value="custom">Custom Announcement</option>
+                                    <option value="renewal">Renewal Reminder</option>
+                                    <option value="support">Support Follow-up</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label for="waBroadcastCampaign">Campaign Header</label>
+                                <input type="text" id="waBroadcastCampaign" placeholder="Weekend Offer">
+                            </div>
+                            <div class="ck-field">
+                                <label for="waBroadcastLimit">Max Recipients</label>
+                                <input type="number" id="waBroadcastLimit" value="300" min="1" max="500">
+                            </div>
+                            <div class="ck-field wa-full">
+                                <label for="waBroadcastMessage">Broadcast Message</label>
+                                <textarea id="waBroadcastMessage" rows="6" placeholder="Write the advertisement or announcement..."></textarea>
+                            </div>
+                        </div>
+                        <div class="wa-broadcast-summary" id="waBroadcastSummary">Choose a segment to see recipient count.</div>
+                        <div class="wa-action-row">
+                            <button class="btn btn-outline" onclick="previewWaBroadcast()">
+                                <i data-lucide="eye"></i> Preview Broadcast
+                            </button>
+                            <button class="btn btn-primary" onclick="sendWaBroadcast()" style="background:#25D366">
+                                <i data-lucide="radio"></i> Send Broadcast
+                            </button>
+                        </div>
+                        <div id="waBroadcastResult" class="wa-preview-box"></div>
+                    </div>
+                </div>
+
+                <!-- Pending Verification Codes -->
+                <div class="admin-card" style="margin-top:20px">
+                    <h3 style="display:flex;align-items:center;gap:8px">
+                        <span style="width:10px;height:10px;border-radius:50%;background:#25D366;display:inline-block;animation:wa-pulse 2s infinite"></span>
+                        Pending Login Verifications
+                    </h3>
+                    <p style="font-size:.82rem;color:var(--gray-400);margin-bottom:16px">
+                        When a customer sends a login code on WhatsApp Web, it appears here. Click Verify to log them in.
+                    </p>
+                    <div id="waPendingList" class="wa-pending-list">
+                        <div class="empty-hint">No pending codes. Waiting for customers...</div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="margin-top:20px">
+                    <h3>Send Order Update via WhatsApp</h3>
+                    <p style="font-size:.82rem;color:var(--gray-400);margin-bottom:16px">
+                        Generate a wa.me link to send order updates from your WhatsApp Web session.
+                    </p>
+                    <div class="add-form" style="max-width:500px">
+                        <div class="ck-field">
+                            <label for="waPhone">Customer Phone</label>
+                            <input type="text" id="waPhone" placeholder="919088212294">
+                        </div>
+                        <div class="ck-field">
+                            <label for="waOrderNumber">Order Number</label>
+                            <input type="text" id="waOrderNumber" placeholder="GO-ABC123">
+                        </div>
+                        <div class="ck-field">
+                            <label for="waMessageType">Message Type</label>
+                            <select id="waMessageType" onchange="toggleWaCredFields()">
+                                <option value="processing">Processing</option>
+                                <option value="on_the_way">On The Way</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="credentials">Send Credentials</option>
+                                <option value="invoice">Invoice</option>
+                                <option value="renewal_reminder">Renewal Reminder</option>
+                                <option value="custom">Custom Message</option>
+                            </select>
+                        </div>
+                        <div id="waCredFields" style="display:none">
+                            <div class="ck-field">
+                                <label for="waCredEmail">Credential Email</label>
+                                <input type="email" id="waCredEmail" placeholder="account@example.com">
+                            </div>
+                            <div class="ck-field">
+                                <label for="waCredPassword">Credential Password</label>
+                                <input type="text" id="waCredPassword" placeholder="password123">
+                            </div>
+                            <div class="ck-field">
+                                <label for="waCredProfile">Profile Name</label>
+                                <input type="text" id="waCredProfile" placeholder="Profile 3">
+                            </div>
+                        </div>
+                        <div id="waCustomField" style="display:none">
+                            <div class="ck-field">
+                                <label for="waCustomMsg">Custom Message</label>
+                                <textarea id="waCustomMsg" rows="4" placeholder="Type your custom message here..." style="width:100%;padding:12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-family:var(--font-body);font-size:.85rem;resize:vertical"></textarea>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="sendWaOrderUpdate()" style="background:#25D366">
+                            <i data-lucide="send"></i> Generate WhatsApp Link
+                        </button>
+                        <div id="waLinkResult" style="margin-top:12px"></div>
+                    </div>
+                </div>
+
+                <!-- Message Log -->
+                <div class="admin-card" style="margin-top:20px">
+                    <h3>Recent WhatsApp Messages</h3>
+                    <div id="waMessageLog" class="wa-message-log">
+                        <div class="empty-hint">No messages sent yet</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== TELEGRAM TAB ========== -->
+            <section class="admin-tab" id="tab-telegram" style="display: none;">
+                <div class="tab-header">
+                    <h1>Telegram Hub</h1>
+                    <div class="tab-filters" style="gap:10px">
+                        <span id="tgConnectionBadge" class="pill pill-pending" style="font-size:.8rem;padding:6px 14px">
+                            Checking...
+                        </span>
+                        <button class="btn btn-primary" onclick="refreshTgHub()" style="background:#0088cc">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Telegram Setup Card -->
+                <div class="admin-card" id="tgSetupCard" style="margin-bottom:20px;border:2px solid #0088cc">
+                    <h3 style="display:flex;align-items:center;gap:10px">
+                        <svg viewBox="0 0 24 24" fill="#0088cc" style="width:24px;height:24px"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.892-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        Telegram Bot Connection
+                    </h3>
+                    <div id="tgSetupContent">
+                        <div style="text-align:center;padding:20px">
+                            <div class="empty-hint">Telegram Bot active and processing logins.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Verify Toggle -->
+                <div class="admin-card" style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <h3 style="margin-bottom:4px">Auto-Verify Mode</h3>
+                        <p style="font-size:.8rem;color:var(--gray-400);margin:0">
+                            When enabled, login codes are verified automatically via Telegram Bot.
+                        </p>
+                    </div>
+                    <label class="wa-toggle">
+                        <input type="checkbox" id="tgAutoVerifyToggle" checked onchange="toggleTgAutoVerify(this.checked)">
+                        <span class="wa-toggle-slider" style="background-color: #0088cc;"></span>
+                    </label>
+                </div>
+
+                <!-- TG Stats Row -->
+                <div class="stats-grid" id="tgStatsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:rgba(0,136,204,.12);color:#0088cc">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Pending Codes</span>
+                            <strong class="stat-value" id="tgPendingCount">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#dcfce7;color:#16a34a">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Verified Today</span>
+                            <strong class="stat-value" id="waVerifiedCount">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- ========== WALLET & VOUCHERS TAB ========== -->
+            <section class="admin-tab" id="tab-vouchers">
+                <div class="tab-header">
+                    <div>
+                        <h1>Wallet & Voucher Hub</h1>
+                        <p style="color:var(--gray-500); font-size:0.9rem;">Manage user credits and gift vouchers.</p>
+                    </div>
+                    <div class="tab-filters">
+                        <button class="btn btn-outline" onclick="loadAdminVouchers()">
+                            <i data-lucide="refresh-cw"></i> Refresh
+                        </button>
+                        <button class="btn btn-primary" onclick="showVoucherCreateModal()">
+                            <i data-lucide="plus"></i> Create Single
+                        </button>
+                        <button class="btn btn-primary" style="background:var(--gray-900)" onclick="showBulkGenerateModal()">
+                            <i data-lucide="layers"></i> Bulk Generate
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid" style="margin-bottom:24px">
+                    <div class="stat-card premium-card">
+                        <div class="stat-icon" style="background:rgba(22,163,74,0.1);color:#16a34a">
+                            <i data-lucide="ticket"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Active Vouchers</span>
+                            <strong class="stat-value" id="statActiveVouchers">0</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card premium-card">
+                        <div class="stat-icon" style="background:rgba(217,119,6,0.1);color:#d97706">
+                            <i data-lucide="wallet"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Total Circulating Balance</span>
+                            <strong class="stat-value" id="statTotalWallet">Rs0 / $0.00</strong>
+                        </div>
+                    </div>
+                    <div class="stat-card premium-card">
+                        <div class="stat-icon" style="background:rgba(37,99,235,0.1);color:#2563eb">
+                            <i data-lucide="activity"></i>
+                        </div>
+                        <div>
+                            <span class="stat-label">Total Transactions</span>
+                            <strong class="stat-value" id="statTotalTxCount">0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inventory-management-grid">
+                    <!-- Vouchers Table -->
+                    <div class="admin-card glass-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--gray-50)">
+                            <h3 style="margin:0; display:flex; align-items:center; gap:8px">
+                                <i data-lucide="list" style="width:18px; color:var(--primary)"></i>
+                                Available Vouchers
+                            </h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vouchersTableBody">
+                                    <tr><td colspan="5" class="empty-state">Loading vouchers...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Audit Log & Transactions -->
+                <!-- Manual Wallet Adjustment Card -->
+                <div class="admin-card glass-card" style="margin-top:24px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px">
+                        <div style="width:40px; height:40px; border-radius:12px; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+                            <i data-lucide="edit-3" style="width:20px; height:20px"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin:0">Manual Wallet Adjustment</h3>
+                            <p style="font-size:0.8rem; color:var(--gray-500); margin:0">Directly modify user balances. This action is permanently audited.</p>
+                        </div>
+                    </div>
+
+                    <div class="add-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px">
+                        <div class="ck-field">
+                            <label>Customer ID or Email</label>
+                            <input type="text" id="adjCustomer" placeholder="e.g. customer@example.com">
+                        </div>
+                        <div class="ck-field">
+                            <label>Amount</label>
+                            <input type="number" id="adjAmount" placeholder="100">
+                        </div>
+                        <div class="ck-field">
+                            <label>Wallet Currency</label>
+                            <select id="adjCurrency" style="height:46px; border-radius:10px;">
+                                <option value="INR">INR wallet (Rs)</option>
+                                <option value="USD">USD wallet ($)</option>
+                            </select>
+                        </div>
+                        <div class="ck-field">
+                            <label>Adjustment Type</label>
+                            <select id="adjType" style="height:46px; border-radius:10px;">
+                                <option value="credit">Credit (Add Funds)</option>
+                                <option value="debit">Debit (Remove Funds)</option>
+                            </select>
+                        </div>
+                        <div class="ck-field" style="grid-column: 1 / -1">
+                            <label>Reason for Adjustment</label>
+                            <input type="text" id="adjReason" placeholder="e.g. Loyalty bonus, Refund for order #123, etc.">
+                        </div>
+                        <div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; margin-top:10px">
+                            <button class="btn btn-primary" onclick="adminAdjustWallet()" style="padding:12px 30px; font-weight:700; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                                <i data-lucide="check" style="margin-right:8px"></i> Execute Adjustment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========== ORDER DETAIL MODAL ========== -->
+
+    <!-- ========== PRODUCT WIZARD OVERLAY ========== -->
+    <div class="admin-modal" id="productWizardModal" style="display:none;">
+        <div class="admin-modal-content" style="max-width: 900px; width: 95%;">
+            <div class="admin-modal-header">
+                <h2 id="wizTitle">Create New Product</h2>
+                <div style="display:flex; gap:12px; align-items:center;">
+                      <button class="btn btn-ai ai-glow" id="wizAiBtn" onclick="generateProductAI()" style="padding:6px 14px; font-size:0.85rem;">
+                          AI Magic Generate
+                      </button>
+                      <button class="close-btn" onclick="closeProductWizard()"><i data-lucide="x"></i></button>
+                  </div>
+            </div>
+            <div class="admin-modal-body" style="background: var(--bg-main); padding:20px; max-height:80vh; overflow-y:auto;">
+                <input type="hidden" id="wizId">
+
+                <!-- CARD 1: Core Identity -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">1. Core Identity & Display</h3>
+                    <div class="add-form" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="ck-field">
+                            <label>Product Name</label>
+                            <input type="text" id="wizName" placeholder="e.g. Netflix" oninput="wizAutoSlug()">
+                        </div>
+                        <div class="ck-field">
+                            <label>Product URL / Slug</label>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <span style="color:var(--gray-400); font-size:0.85rem; white-space:nowrap;">/product/</span>
+                                <input type="text" id="wizSlug" placeholder="e.g. netflix" style="font-family:monospace;">
+                            </div>
+                            <small style="color:var(--gray-400); font-size:0.75rem;">Auto-generated from name. Edit to customize the URL.</small>
+                        </div>
+                        <div class="ck-field">
+                            <label>Category</label>
+                            <select id="wizCategory">
+                                <option value="streaming">Streaming</option>
+                                <option value="music">Music</option>
+                                <option value="ai">AI Tools</option>
+                                <option value="vpn">VPN</option>
+                                <option value="gift-cards">Gift Cards</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="ck-field">
+                            <label>Product Image</label>
+                            <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+                                <img id="wizImgPreview" src="" alt="Preview"
+                                     style="width:64px; height:64px; border-radius:12px; object-fit:cover; border:1px solid var(--gray-200); background:#f3f4f6;"
+                                     onerror="this.style.display='none'">
+                                <div style="flex:1">
+                                    <input type="file" id="wizImgFile" accept="image/*"
+                                           style="font-size:0.85rem; font-family:var(--font-body);">
+                                    <div id="wizImgStatus" style="font-size:0.8rem; color:var(--gray-500); margin-top:4px;">Select an image to upload</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="font-size:0.85rem; padding:6px 12px; margin-bottom:8px;" onclick="wizUploadImage()">
+                                Upload Image
+                            </button>
+                            <div style="font-size:0.75rem; color:var(--gray-400); margin-bottom:4px;">Or paste a URL directly:</div>
+                            <input type="text" id="wizImg" placeholder="assets/images/netflix.png">
+                        </div>
+                          <div class="ck-field" style="grid-column: span 2;">
+                              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                  <label style="margin:0">Product Description</label>
+                              </div>
+                              <textarea id="wizDescription" placeholder="A catchy product description..."
+                                        style="width:100%; height:80px; padding:12px; border:1px solid var(--border-color); border-radius:var(--radius); background:var(--bg-input); color:var(--text-main); font-family:var(--font-body); font-size:0.85rem; resize:vertical;"></textarea>
+                          </div>
+
+                          <div class="ck-field" style="grid-column: span 2;">
+                              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                  <label style="margin:0">SEO Keywords (Comma separated)</label>
+                                  <button class="text-btn" onclick="suggestKeywordsAI()" style="font-size:0.75rem; color:#a855f7;">Suggest Keywords</button>
+                              </div>
+                              <input type="text" id="wizKeywords" placeholder="e.g. cheap netflix, netflix shared account, buy netflix online"
+                                     style="background:var(--bg-input); color:var(--text-main); border-color:var(--border-color);">
+                          </div>
+
+                          <div class="ck-field" style="grid-column: span 2;">
+                              <label>Product Support AI Notes</label>
+                              <textarea id="wizSupportAiNotes" placeholder="Example: Ask for OTP after payment; never tell customer to change password; replacement allowed within warranty."
+                                        style="width:100%; height:86px; padding:12px; border:1px solid var(--border-color); border-radius:var(--radius); background:var(--bg-input); color:var(--text-main); font-family:var(--font-body); font-size:0.85rem; resize:vertical;"></textarea>
+                              <small style="color:var(--gray-400); font-size:0.75rem;">Used only by support AI for this product.</small>
+                          </div>
+
+                          <div class="ck-field">
+                              <label>Emoji Fallback</label>
+                              <input type="text" id="wizEmoji" placeholder="[MAGIC]" style="font-size:1.3rem; background:var(--bg-input); color:var(--text-main); border-color:var(--border-color);">
+                          </div>
+                        <div class="ck-field" style="display:flex; align-items:center; gap:10px;">
+                            <label style="margin:0">Active</label>
+                            <input type="checkbox" id="wizActive" checked style="width:20px;height:20px;accent-color:var(--green-500)">
+                        </div>
+                        <div class="ck-field" style="display:flex; align-items:center; gap:10px;">
+                            <label style="margin:0">Featured</label>
+                            <input type="checkbox" id="wizHot" style="width:20px;height:20px;accent-color:var(--orange-500)">
+                        </div>
+                        <div class="ck-field">
+                            <label>Featured Position</label>
+                            <input type="number" id="wizFeaturedPosition" min="1" step="1" placeholder="1 = first Top Deal"
+                                   style="background:var(--bg-input); color:var(--text-main); border-color:var(--border-color);">
+                            <small style="color:var(--gray-400); font-size:0.75rem;">Only used when Featured is enabled. Lower number shows first.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Fulfillment -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">2. Fulfillment & Delivery</h3>
+                    <div class="add-form" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="ck-field">
+                            <label>Availability Region</label>
+                            <select id="wizRegionLock">
+                                <option value="all">Global + India</option>
+                                <option value="india">India Only</option>
+                                <option value="global">Global Only</option>
+                            </select>
+                        </div>
+                        <div class="ck-field">
+                            <label>Delivery Mode</label>
+                            <select id="wizDeliveryMode">
+                                <option value="automatic">Automatic (from stock)</option>
+                                <option value="manual">Manual Dispatch</option>
+                            </select>
+                        </div>
+                        <div class="ck-field">
+                            <label>Auth Credential Type</label>
+                            <select id="wizAuthType">
+                                <option value="email_password">Email & Password</option>
+                                <option value="phone_otp">Phone Number & OTP</option>
+                                <option value="invite_link">Invite Link directly</option>
+                                <option value="profile_pin">Account Profile + PIN</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Variant Matrix -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">3. Variant Matrix Configurator</h3>
+                    <p style="font-size:0.85rem; color:var(--gray-500); margin-bottom:12px;">Define the exact plans you sell. Deleting a row completely removes that option from the storefront.</p>
+                    <div class="table-wrap">
+                        <table class="admin-table" style="font-size:0.85rem">
+                            <thead>
+                                <tr style="background:var(--gray-50);">
+                                    <th>Access Type</th>
+                                    <th>Quality</th>
+                                    <th>Duration (Int)</th>
+                                    <th>Duration Label</th>
+                                    <th>Price INR / USD</th>
+                                    <th>Orig. Price</th>
+                                    <th>Stock</th>
+                                    <th>Opt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wizVariantsBody">
+                            </tbody>
+                        </table>
+                        <button class="btn btn-outline" style="margin-top:12px; font-size:0.85rem; padding:6px 12px;" onclick="wizAddVariant()">
+                            <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Variant Row
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARD 4: Feature Notes -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">4. Feature Notes &amp; Badges</h3>
+                    <p style="font-size:0.85rem; color:var(--gray-500); margin-bottom:12px;">These appear as bullet points on the product card.</p>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <!-- Shared Features -->
+                        <div>
+                            <label style="font-size:.85rem; font-weight:600; color:var(--gray-700); display:block; margin-bottom:8px;">Shared Plan Features</label>
+                            <div id="wizFeatShared" style="display:flex; flex-direction:column; gap:6px;"></div>
+                            <button class="btn btn-outline" style="margin-top:8px; font-size:0.8rem; padding:4px 10px;" onclick="wizAddFeature('shared')">
+                                <i data-lucide="plus" style="width:12px;height:12px;"></i> Add Note
+                            </button>
+                        </div>
+                        <!-- Personal Features -->
+                        <div>
+                            <label style="font-size:.85rem; font-weight:600; color:var(--gray-700); display:block; margin-bottom:8px;">Personal Plan Features</label>
+                            <div id="wizFeatPersonal" style="display:flex; flex-direction:column; gap:6px;"></div>
+                            <button class="btn btn-outline" style="margin-top:8px; font-size:0.8rem; padding:4px 10px;" onclick="wizAddFeature('personal')">
+                                <i data-lucide="plus" style="width:12px;height:12px;"></i> Add Note
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 5: How to Use -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">5. How to Use Instructions</h3>
+                    <p style="font-size:0.85rem; color:var(--gray-500); margin-bottom:12px;">Shown on each product page so customers know whether it is shared account, link invite, mail activation, number activation, OTP login, or custom setup.</p>
+                    <div class="add-form" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="ck-field">
+                            <label>Setup Type</label>
+                            <select id="wizUsageType">
+                                <option value="auto">Auto detect from plan</option>
+                                <option value="shared_account">Shared account</option>
+                                <option value="shared_link">Shared by link</option>
+                                <option value="shared_id_password">Shared ID + password</option>
+                                <option value="mail_activation">Mail activation</option>
+                                <option value="number_activation">Number activation</option>
+                                <option value="otp_login">Login with OTP</option>
+                                <option value="invite_link">Invite link</option>
+                                <option value="personal_account">Personal account</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="ck-field">
+                            <label>Important Note</label>
+                            <input type="text" id="wizUsageNote" placeholder="Example: Do not change password or recovery details.">
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin:12px 0 8px;">
+                        <strong style="font-size:.9rem;">Custom steps</strong>
+                        <button class="btn btn-outline" type="button" onclick="wizAddUsageStep()" style="padding:6px 12px; font-size:.82rem;">
+                            <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Step
+                        </button>
+                    </div>
+                    <div id="wizUsageSteps" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    <small style="display:block; margin-top:10px; color:var(--gray-400); font-size:0.75rem;">Leave steps empty to auto-generate useful instructions from setup type and selected variant.</small>
+                </div>
+
+                <!-- CARD 5: FAQ Section -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">6. AI-Generated FAQ</h3>
+                    <p style="font-size:0.85rem; color:var(--gray-500); margin-bottom:12px;">Manage frequently asked questions for this product.</p>
+                    <div id="wizFaqContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+                    <button class="btn btn-outline" style="margin-top:12px; font-size:0.85rem; padding:6px 12px;" onclick="wizAddFaq()">
+                        <i data-lucide="plus" style="width:14px;height:14px;"></i> Add FAQ Item
+                    </button>
+                </div>
+
+                <!-- CARD 6: Reviews Section -->
+                <div class="admin-card" style="margin-bottom:20px">
+                    <h3 style="margin-bottom:16px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">7. AI-Generated Reviews</h3>
+                    <p style="font-size:0.85rem; color:var(--gray-500); margin-bottom:12px;">Manage customer reviews that appear on the product page.</p>
+                    <div id="wizReviewsContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+                    <button class="btn btn-outline" style="margin-top:12px; font-size:0.85rem; padding:6px 12px;" onclick="wizAddReview()">
+                        <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Review Item
+                    </button>
+                </div>
+
+                <div class="admin-modal-actions" style="margin-top:24px; display:flex; justify-content:flex-end; gap:12px;">
+                    <button class="btn btn-outline" onclick="closeProductWizard()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveProductWizard()"><i data-lucide="save"></i> Save Product Configurations</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="genericModal" style="display:none">
+        <div class="modal-card" style="max-width:640px">
+            <div class="modal-header">
+                <h2 id="genericModalTitle">Details</h2>
+                <button class="modal-close" onclick="closeModal('genericModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="genericModalBody"></div>
+            <div class="modal-footer" id="genericModalFooter"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="orderModal" style="display:none">
+        <div class="modal-card" style="max-width:560px">
+            <div class="modal-header">
+                <h2 id="modalOrderTitle">Order Details</h2>
+                <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="modalOrderBody"></div>
+            <div class="modal-footer" id="modalOrderFooter"></div>
+        </div>
+    </div>
+
+    <!-- ========== COUPON MODAL ========== -->
+    <div class="modal-overlay" id="couponModal" style="display:none">
+        <div class="modal-card" style="max-width:480px">
+            <div class="modal-header">
+                <h2 id="couponModalTitle">Create Coupon</h2>
+                <button class="modal-close" onclick="closeModal('couponModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="add-form">
+                    <input type="hidden" id="couponEditId">
+                    <div class="ck-field">
+                        <label>Code</label>
+                        <input type="text" id="couponCode" placeholder="SAVE20" style="text-transform:uppercase">
+                    </div>
+                    <div class="ck-field">
+                        <label>Discount Type</label>
+                        <select id="couponType" onchange="toggleCouponFields()">
+                            <option value="percent">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (INR / USD)</option>
+                        </select>
+                    </div>
+                    <div class="ck-field">
+                        <label>Currency</label>
+                        <select id="couponCurrency">
+                            <option value="INR">Rs (INR)</option>
+                            <option value="USD">$ (USD)</option>
+                            <option value="BOTH">Both ($ + Rs)</option>
+                        </select>
+                    </div>
+                    <div class="ck-field" id="couponPercentField">
+                        <label>Discount Percent</label>
+                        <input type="number" id="couponPercent" placeholder="20" min="1" max="100">
+                    </div>
+                    <div class="ck-field" id="couponAmountField" style="display:none">
+                        <label>Discount Amount (INR / USD)</label>
+                        <input type="number" id="couponAmount" placeholder="50" min="1">
+                    </div>
+                    <div class="ck-field">
+                        <label>Min Order Amount</label>
+                        <input type="number" id="couponMinOrder" placeholder="0" min="0">
+                    </div>
+                    <div class="ck-field">
+                        <label>Max Uses</label>
+                        <input type="number" id="couponMaxUses" placeholder="1000" min="1">
+                    </div>
+                    <div class="ck-field">
+                        <label>Expires At (optional)</label>
+                        <input type="date" id="couponExpiry">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('couponModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCoupon()">
+                    <i data-lucide="save"></i> Save Coupon
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DELIVER MODAL ========== -->
+    <div class="modal-overlay" id="deliverModal" style="display:none">
+        <div class="modal-card" style="max-width:480px">
+            <div class="modal-header">
+                <h2>Manual Delivery</h2>
+                <button class="modal-close" onclick="closeModal('deliverModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <input type="hidden" id="deliverOrderId">
+                <input type="hidden" id="deliverOrderNumber">
+                <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:15px">Fill in the credentials to send to the user.</p>
+                <div class="add-form">
+                    <div class="ck-field">
+                        <label>Credential Email</label>
+                        <input type="email" id="deliverEmail" placeholder="credential@example.com">
+                    </div>
+                    <div class="ck-field">
+                        <label>Credential Password</label>
+                        <input type="text" id="deliverPassword" placeholder="password123">
+                    </div>
+                    <div class="ck-field">
+                        <label>Phone Number</label>
+                        <input type="text" id="deliverPhone" placeholder="+123456789 (if applicable)">
+                    </div>
+                    <div class="ck-field">
+                        <label>OTP / PIN Code</label>
+                        <input type="text" id="deliverOtp" placeholder="123456 (if applicable)">
+                    </div>
+                    <div class="ck-field">
+                        <label>Profile Name</label>
+                        <input type="text" id="deliverProfile" placeholder="Profile 3 (if applicable)">
+                    </div>
+                    <div class="ck-field">
+                        <label>Login Link</label>
+                        <input type="text" id="deliverLink" placeholder="https://... (if applicable)">
+                    </div>
+                    <div class="ck-field">
+                        <label>Notes (optional)</label>
+                        <input type="text" id="deliverNotes" placeholder="Don't change password">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('deliverModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmDeliver()">
+                    <i data-lucide="send"></i> Deliver & Notify
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM ADMIN MODALS -->
+    <div class="modal-overlay" id="adminConfirmOverlay" onclick="AdminUtils.closeConfirm()" style="display:none"></div>
+    <div class="modal-center" id="adminConfirmModal" style="display:none">
+        <div class="modal-header">
+            <h3 id="adminConfirmTitle">Confirm Action</h3>
+            <button class="modal-close" onclick="AdminUtils.closeConfirm()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="adminConfirmMessage" style="color:var(--gray-600); line-height:1.6; margin-bottom:24px;"></p>
+            <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="AdminUtils.closeConfirm()">Cancel</button>
+                <button class="btn btn-primary" id="adminConfirmBtn" style="background:var(--danger); border-color:var(--danger); color:white;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Migration Script embedded
+        window.showBlogModal = async function(id = null) {
+            const editIdEl = document.getElementById('blogEditId');
+            const titleEl = document.getElementById('blogModalTitle');
+
+            if (editIdEl) editIdEl.value = id || '';
+            if (titleEl) titleEl.textContent = id ? 'Edit Blog Post' : 'Create Blog Post';
+
+            if (id) {
+                try {
+                    const res = await adminFetch(`${API_BASE}/blogs/admin/list`);
+                    const data = await res.json();
+                    const b = (data.blogs || []).find(x => x.id === id);
+                    if (b) {
+                        document.getElementById('blogTitle').value = b.title || '';
+                        document.getElementById('blogSlug').value = b.slug || '';
+                        document.getElementById('blogCategory').value = b.category || 'Streaming';
+                        document.getElementById('blogPublished').value = String(b.is_published);
+                        document.getElementById('blogImage').value = b.image_url || '';
+                        document.getElementById('blogContent').value = b.content || '';
+                    }
+                } catch (e) { console.error(e); }
+            } else {
+                document.getElementById('blogTitle').value = '';
+                document.getElementById('blogSlug').value = '';
+                document.getElementById('blogCategory').value = 'Streaming';
+                document.getElementById('blogPublished').value = 'true';
+                document.getElementById('blogImage').value = '';
+                document.getElementById('blogContent').value = '';
+            }
+
+            openModal('blogModal');
+        };
+
+        window.saveBlog = async function() {
+            const id = document.getElementById('blogEditId').value;
+            const payload = {
+                title: document.getElementById('blogTitle').value,
+                slug: document.getElementById('blogSlug').value || document.getElementById('blogTitle').value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+                category: document.getElementById('blogCategory').value,
+                is_published: document.getElementById('blogPublished').value === 'true',
+                image_url: document.getElementById('blogImage').value,
+                content: document.getElementById('blogContent').value
+            };
+
+            if (!payload.title || !payload.content) {
+                showToast('[X] Title and Content are required');
+                return;
+            }
+
+            const url = id ? `${API_BASE}/blogs/admin/${id}` : `${API_BASE}/blogs/admin/create`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await adminFetch(url, {
+                    method,
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(id ? 'Post updated' : 'Post created! ');
+                    closeModal('blogModal');
+                    loadBlogs();
+                } else {
+                    showToast('[X] ' + (data.detail || 'Failed to save'));
+                }
+            } catch (e) {
+                showToast('[X] Network error');
+            }
+        };
+
+        window.deleteBlog = async function(id) {
+            if (!confirm('Delete this post?')) return;
+            try {
+                const res = await adminFetch(`${API_BASE}/blogs/admin/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast('Post deleted');
+                    loadBlogs();
+                }
+            } catch (e) { showToast('[X] Error deleting post'); }
+        };
+
+        window.runCatalogMigration = async function() {
+            if(prompt("Full rebuild can overwrite products from this browser snapshot. Type REBUILD to continue.") !== "REBUILD") return;
+            const prods = AdminStore.getProducts();
+            const API = (window.GETOTTS_CONFIG && window.GETOTTS_CONFIG.API_BASE) || 'https://api.getotts.com/api/v1/';
+            try {
+                const res = await fetch(`${API.endsWith('/') ? API : API + '/'}admin/catalog/migrate`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ products: prods, confirm_full_replace: true })
+                });
+                const response = await res.json();
+                if(response.success) {
+                    alert("Migration Complete! Products safely written to Postgres.");
+                } else {
+                    alert("Failed: " + (response?.message || JSON.stringify(response)));
+                }
+            } catch (e) {
+                alert("Migration Error: " + (e?.message || JSON.stringify(e)));
+            }
+        };
+    </script>
+            <!-- ========== BLOG MODAL ========== -->
+            <div id="blogModal" class="modal-overlay" style="display:none">
+                <div class="modal-card" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <span id="blogModalTitle">Create Blog Post</span>
+                        <button class="modal-close" onclick="closeModal('blogModal')">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="blogEditId">
+                        <div class="ck-field">
+                            <label>Title</label>
+                            <input type="text" id="blogTitle" placeholder="Post Title">
+                        </div>
+                        <div class="ck-field">
+                            <label>Slug (URL Identifier)</label>
+                            <input type="text" id="blogSlug" placeholder="post-url-slug">
+                        </div>
+                        <div class="grid-2">
+                            <div class="ck-field">
+                                <label>Category</label>
+                                <select id="blogCategory">
+                                    <option value="Streaming">Streaming</option>
+                                    <option value="Music">Music</option>
+                                    <option value="AI Tools">AI Tools</option>
+                                    <option value="VPN">VPN</option>
+                                    <option value="Guides">Guides</option>
+                                </select>
+                            </div>
+                            <div class="ck-field">
+                                <label>Status</label>
+                                <select id="blogPublished">
+                                    <option value="true">Published</option>
+                                    <option value="false">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="ck-field">
+                            <label>Featured Image URL</label>
+                            <input type="text" id="blogImage" placeholder="https://example.com/image.jpg">
+                        </div>
+                        <div class="ck-field">
+                            <label>Content (HTML supported)</label>
+                            <textarea id="blogContent" style="height: 300px; resize: vertical;" placeholder="Post content..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="closeModal('blogModal')">Cancel</button>
+                        <button class="btn primary-btn" onclick="saveBlog()">Save & Publish Post</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/admin-static/js/config.js?v=20260512_wa_blog_fix"></script>
+    <script src="/admin-static/js/data.js?v="></script>
+    <script src="/admin-static/js/adminStore.js?v="></script>
+    <script src="/admin-static/js/admin.v51.js?v="></script>
+    <script src="/admin-static/js/admin-support.js?v="></script>
+    <script src="/admin-static/js/grammar-assist.js?v=20260518-writing1" defer></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+    <title>Admin Chat &mdash; GetOTTs</title>
+    <meta name="csrf-token" content="">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="/admin-static/css/admin-chat.css?v=ui-polish2-20260628">
+</head>
+<body>
+    <div class="chat-app" role="application" aria-label="Customer support inbox">
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Conversations">
+            <header class="sidebar-header">
+                <div class="header-top">
+                    <img src="https://getotts.com/assets/images/logo-upgraded-20260603.png" alt="" class="logo">
+                    <h2>Support Inbox</h2>
+                    <button type="button" class="sound-toggle" id="soundToggle" aria-pressed="true" aria-label="Toggle notification sound" title="Toggle notification sound">
+                        <i data-lucide="volume-2"></i>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <i data-lucide="search" aria-hidden="true"></i>
+                    <label for="sessionSearch" class="sr-only">Search conversations</label>
+                    <input type="text" id="sessionSearch" placeholder="Search customers..." autocomplete="off">
+                </div>
+            </header>
+            <div class="session-list" id="sessionList" role="list" aria-label="Active conversations">
+                <div class="loading-state">Loading conversations...</div>
+            </div>
+            <footer class="sidebar-footer">
+                <a href="/adminno881/" class="back-link">
+                    <i data-lucide="arrow-left" aria-hidden="true"></i> Back to Dashboard
+                </a>
+            </footer>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <div id="noChatSelected" class="empty-view">
+                <div class="empty-content">
+                    <i data-lucide="message-square" aria-hidden="true"></i>
+                    <h3>Select a conversation to start chatting</h3>
+                    <p>Customer support messages will appear here in real-time.</p>
+                </div>
+            </div>
+
+            <section id="chatView" class="chat-view" style="display: none;" aria-label="Active conversation">
+                <header class="chat-header">
+                    <div class="customer-info">
+                        <button type="button" class="mobile-back" onclick="app.backToInbox()" aria-label="Back to inbox">
+                            <i data-lucide="arrow-left" aria-hidden="true"></i>
+                        </button>
+                        <div class="avatar" id="activeAvatar" aria-hidden="true">U</div>
+                        <div class="details">
+                            <h3 id="activeName">Customer Name</h3>
+                            <span id="activeContact">email@example.com</span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <div id="orderBadge" class="order-badge" style="display: none;" aria-label="Order number">
+                            <i data-lucide="package" aria-hidden="true"></i>
+                            <span id="orderNumber">OTT-123456</span>
+                        </div>
+                        <button class="close-btn" onclick="app.closeActiveChat()" title="Resolve and close (Ctrl+Shift+R)" aria-label="Resolve and close conversation">
+                            <i data-lucide="check-circle" aria-hidden="true"></i> Resolve
+                        </button>
+                    </div>
+                </header>
+
+                <div id="activeOrderContext" class="order-context-card" style="display:none;" aria-label="Order context"></div>
+
+                <div class="messages-container" id="messagesContainer" role="log" aria-live="polite" aria-relevant="additions" aria-label="Messages">
+                    <!-- Messages will be injected here -->
+                </div>
+
+                <footer class="chat-footer">
+                    <form id="replyForm" onsubmit="app.sendReply(event)" aria-label="Reply form">
+                        <label for="replyInput" class="sr-only">Type a reply</label>
+                        <input type="text" id="replyInput" placeholder="Type a message... (Enter to send)" autocomplete="off" aria-label="Reply message">
+                        <button type="submit" id="sendBtn" aria-label="Send reply">
+                            <i data-lucide="send" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </footer>
+            </section>
+        </main>
+
+        <!-- Connection Overlay -->
+        <div id="statusOverlay" class="status-overlay" style="display: none;" role="status" aria-live="polite">
+            <div class="status-content">
+                <i data-lucide="wifi-off" aria-hidden="true"></i>
+                <span>Disconnected. Retrying...</span>
+            </div>
+        </div>
+
+        <div id="srLive" class="sr-only" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- Notification Sound -->
+    <audio id="notifSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="/admin-static/js/admin-chat-app.js?v=ui-polish2-20260628"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+    <script src="/admin-static/js/grammar-assist.js?v=20260518-writing1" defer></script>
+</body>
+</html>

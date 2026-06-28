@@ -1,0 +1,220 @@
+/* ============================================================
+   GetOTTs Responsive Sweep — v1 (2026-06-28)
+   Phone / Tablet / Desktop / Wide breakpoints.
+   Additive — does not override design tokens, only fixes layout
+   collisions, touch targets, overflow and grid density.
+   ============================================================ */
+
+/* ---------- Global hygiene ---------- */
+html, body { max-width: 100%; overflow-x: hidden; }
+*, *::before, *::after { -webkit-tap-highlight-color: transparent; }
+img, video, iframe { max-width: 100%; height: auto; }
+button, a, input, select, textarea { font: inherit; }
+
+/* Prevent iOS auto-zoom on focus (inputs < 16px trigger zoom) */
+@media (max-width: 767px) {
+    input, select, textarea { font-size: 16px !important; }
+}
+
+/* ---------- Container fluid widths per breakpoint ---------- */
+.container { width: 100%; margin-inline: auto; padding-inline: clamp(14px, 4vw, 28px); }
+@media (min-width: 640px)  { .container { max-width: 640px; } }
+@media (min-width: 768px)  { .container { max-width: 760px; } }
+@media (min-width: 1024px) { .container { max-width: 980px; padding-inline: 24px; } }
+@media (min-width: 1280px) { .container { max-width: 1200px; padding-inline: 28px; } }
+@media (min-width: 1536px) { .container { max-width: 1380px; } }
+@media (min-width: 1920px) { .container { max-width: 1480px; } }
+
+/* ---------- Touch targets (mobile + tablet) ---------- */
+@media (max-width: 1024px) {
+    a.btn, button, .btn, .nav-link, [role="button"] {
+        min-height: 44px;
+    }
+    .icon-btn, .header-icon, .badge-icon { min-width: 44px; min-height: 44px; }
+}
+
+/* ---------- Header / nav collisions ---------- */
+@media (min-width: 992px) and (max-width: 1359px) {
+    /* Nav was overlapping the search box in the medium range */
+    .main-header .nav-links { gap: 14px !important; }
+    .main-header .search-wrap { flex: 1 1 280px; min-width: 220px; }
+}
+@media (max-width: 991px) {
+    /* Single mobile profile entry, no desktop duplicate */
+    #mobileProfileNav { display: block; }
+}
+@media (min-width: 992px) {
+    #mobileProfileNav { display: none !important; }
+}
+
+/* ---------- Product grid density per breakpoint ---------- */
+.product-row, .product-grid, .deals-grid {
+    display: grid;
+    gap: clamp(12px, 2vw, 20px);
+}
+.product-row, .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 640px)  { .product-row, .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px)  { .product-row, .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .product-row, .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1440px) { .product-row, .product-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 1800px) { .product-row, .product-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+
+/* Cards: equal heights and clean text overflow */
+.product-card, .deal-card {
+    display: flex; flex-direction: column;
+    min-width: 0;
+    height: 100%;
+}
+.product-card * , .deal-card * { min-width: 0; }
+.product-card .title, .product-card h3, .deal-card h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* ---------- Section padding scales ---------- */
+section, .section { padding-block: clamp(28px, 5vw, 64px); }
+
+/* ---------- Tables → cards on mobile ---------- */
+@media (max-width: 640px) {
+    table.responsive, .data-table.responsive {
+        display: block; width: 100%;
+    }
+    table.responsive thead, .data-table.responsive thead { display: none; }
+    table.responsive tbody, table.responsive tr,
+    .data-table.responsive tbody, .data-table.responsive tr { display: block; width: 100%; }
+    table.responsive tr, .data-table.responsive tr {
+        border: 1px solid rgba(148,163,184,.25);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: rgba(255,255,255,.6);
+    }
+    table.responsive td, .data-table.responsive td {
+        display: flex; justify-content: space-between; gap: 12px;
+        padding: 6px 0; border: none;
+    }
+    table.responsive td::before, .data-table.responsive td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: rgba(15,23,42,.7);
+    }
+}
+
+/* ---------- Forms: full-width on phone, two-col on tablet+ ---------- */
+.form-row { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 768px) {
+    .form-row.two-col { grid-template-columns: 1fr 1fr; }
+    .form-row.three-col { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ---------- Buttons that should expand on phone ---------- */
+@media (max-width: 480px) {
+    .btn-block-mobile, .cta-primary, .buy-now-btn {
+        width: 100% !important;
+    }
+}
+
+/* ---------- Modals: respect viewport ---------- */
+.modal, .dialog, .lightbox-content {
+    max-width: min(560px, 96vw) !important;
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+/* ---------- Footer: stack tight on phone ---------- */
+@media (max-width: 640px) {
+    .site-footer, footer.main-footer {
+        text-align: center;
+    }
+    .site-footer .footer-cols, footer.main-footer .footer-cols {
+        grid-template-columns: 1fr !important;
+        gap: 18px !important;
+    }
+}
+
+/* ---------- Hide-on-X helpers ---------- */
+.hide-on-mobile { @media (max-width: 767px)  { display: none !important; } }
+.hide-on-tablet { @media (min-width: 768px) and (max-width: 1023px) { display: none !important; } }
+.hide-on-desktop { @media (min-width: 1024px) { display: none !important; } }
+.show-on-mobile { display: none !important; }
+@media (max-width: 767px) { .show-on-mobile { display: block !important; } }
+
+/* ---------- Image safety ---------- */
+img[src=""], img:not([src]) { visibility: hidden; }
+
+/* ---------- Print ---------- */
+@media print {
+    header, footer, #ug-tabbar, #ug-buybar, #ug-scrolltop, #ug-progress { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* ============================================================
+   v1.1 (2026-06-28) — Header collision + FOUC guards
+   ============================================================ */
+
+/* Anti-FOUC: hide the entire body skeleton until external
+   stylesheets have been parsed AND web fonts have settled, then
+   fade in. <link rel=stylesheet> is parser-blocking, so the inline
+   script after the last stylesheet flips .css-ready and the page
+   becomes visible only after layout is stable. A 1200ms safety
+   timeout (.fouc-timeout) guarantees the page always shows. */
+html:not(.css-ready):not(.fouc-timeout) body {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+html.css-ready body, html.fouc-timeout body {
+    opacity: 1;
+    transition: opacity .18s ease-out;
+}
+/* Belt-and-braces: also keep the header hidden specifically */
+html:not(.css-ready):not(.fouc-timeout) .header,
+html:not(.css-ready):not(.fouc-timeout) .main-header { visibility: hidden; }
+
+
+/* ---------- Header at the awkward 900-1279px range ---------- */
+/* The desktop nav has 9 items + search + cart + auth buttons.
+   Below 1280px the search-box and nav-links overlap. Hide the
+   secondary search there (mobile nav still has its own search). */
+@media (max-width: 1279px) {
+    .header .header-actions .search-box,
+    .main-header .header-actions .search-box { display: none !important; }
+    .header .main-nav .main-nav-link { padding: 8px 7px !important; font-size: 0.78rem !important; }
+    .header .header-actions { gap: 6px !important; }
+    /* Sign Up label only, drop "Sign In" text — icon stays */
+    .header .header-signin .login-text { display: none !important; }
+    .header .header-signin { padding: 7px 9px !important; }
+}
+
+/* At 992-1099px the nav itself runs out of room — push to hamburger.
+   .mobile-toggle is currently shown <=991px by base styles; widen it. */
+@media (max-width: 1099px) {
+    .header .main-nav:not(.open) { display: none !important; }
+    .header .mobile-toggle { display: inline-flex !important; }
+}
+
+/* Cart price label is heavy text at narrow widths */
+@media (max-width: 1199px) {
+    .header .cart-price { display: none !important; }
+}
+
+/* ---------- Reserve space for JS-injected toolbars to prevent
+   layout shift on hydrate ---------- */
+@media (max-width: 767px) {
+    body { padding-bottom: 68px; } /* matches #ug-tabbar height */
+}
+
+/* ---------- Logo wordmark shrinks instead of wrapping ---------- */
+@media (max-width: 380px) {
+    .logo-name { font-size: 1.05rem !important; }
+    .logo img { height: 28px !important; }
+}

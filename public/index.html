@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/perf-beacon.js?v=20260628-perf1"></script>
     <script src="/js/tracking.js?v=20260612-meta878" defer></script>
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,14 +77,17 @@
                 setTimeout(releaseCriticalShell, 2500);
             }
             function scheduleStyleLoad() {
+                // Load deferred styles right after first paint so the page
+                // doesn't appear "stuck" in the critical-first-paint shell.
                 setTimeout(function () {
                     if ('requestIdleCallback' in window) {
-                        window.requestIdleCallback(loadDeferredStyles, { timeout: 2500 });
+                        window.requestIdleCallback(loadDeferredStyles, { timeout: 600 });
                     } else {
                         loadDeferredStyles();
                     }
-                }, window.matchMedia && window.matchMedia('(min-width: 901px)').matches ? 30000 : 12000);
+                }, 200);
             }
+
             ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (eventName) {
                 window.addEventListener(eventName, loadDeferredStyles, { once: true, passive: true });
             });
@@ -278,11 +282,50 @@
     <style id="home-hero-device-owned-fix">
         @media(max-width:520px){body.home-page .mobile-proof-offer{grid-template-columns:minmax(0,1fr) 64px!important;width:min(100%,230px)!important;max-width:230px!important;justify-self:start!important;min-height:44px!important;align-items:center!important;gap:8px!important;padding:7px 10px!important}body.home-page .mobile-proof-offer>i,body.home-page .mobile-proof-offer>svg,body.home-page .mobile-proof-offer span{display:none!important}body.home-page .mobile-proof-offer strong{font-size:.68rem!important;line-height:1.05!important;text-align:left!important;white-space:nowrap!important}body.home-page .mobile-proof-offer code{grid-column:auto!important;width:auto!important;min-width:0!important;padding:6px 8px!important;font-size:.58rem!important;line-height:1!important;text-align:center!important}}
         @media(min-width:521px) and (max-width:820px){body.home-page .hero-category-wrapper,body.home-page .gz-hero-lower{display:none!important}body.home-page .mobile-proof-strip{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(128px,156px)!important;gap:10px!important;width:min(100%,calc(100vw - 48px))!important;max-width:680px!important;margin:0 auto!important}body.home-page .mobile-proof-stats{min-height:58px!important}body.home-page .mobile-proof-offer{display:grid!important;grid-template-columns:minmax(0,1fr)!important;min-height:58px!important;padding:8px 10px!important}body.home-page .mobile-proof-offer>i,body.home-page .mobile-proof-offer>svg,body.home-page .mobile-proof-offer span{display:none!important}body.home-page .mobile-proof-offer strong{font-size:.72rem!important;text-align:center!important;white-space:nowrap!important}body.home-page .mobile-proof-offer code{grid-column:1!important;width:100%!important;padding:6px 8px!important;font-size:.62rem!important;text-align:center!important}}
-        @media(min-width:821px) and (max-width:1040px){body.home-page .animated-hero{min-height:590px!important;padding-top:0!important;overflow:hidden!important}body.home-page .hero-slider,body.home-page .hero-slider .slide,body.home-page .hero-slider .slide-1{height:370px!important;min-height:370px!important;overflow:visible!important}body.home-page .hero-category-wrapper{display:block!important;width:calc(100vw - 64px)!important;max-width:960px!important;margin:18px auto 0!important;padding:0!important}body.home-page .gz-hero-lower{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,280px)!important;gap:14px!important;width:100%!important;max-width:none!important;margin:0!important;align-items:stretch!important}body.home-page .gz-stats-strip{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;height:70px!important;min-height:70px!important;padding:9px 12px!important}body.home-page .gz-stats-strip>div{grid-template-columns:24px minmax(0,auto)!important;column-gap:8px!important;min-width:0!important}body.home-page .gz-stats-strip strong{font-size:.95rem!important;line-height:1!important}body.home-page .gz-stats-strip span{font-size:.58rem!important;line-height:1.05!important}body.home-page .gz-coupon-card{display:grid!important;grid-template-columns:24px minmax(0,1fr) 62px!important;gap:9px!important;min-width:0!important;max-width:280px!important;min-height:70px!important;height:70px!important;padding:9px 10px!important;justify-self:stretch!important}body.home-page .gz-coupon-card strong{font-size:.78rem!important;line-height:1.08!important;white-space:normal!important}body.home-page .gz-coupon-card span{font-size:.6rem!important;line-height:1.05!important}body.home-page .gz-coupon-card code{padding:7px 8px!important;font-size:.62rem!important;text-align:center!important;white-space:nowrap!important}body.home-page .mobile-proof-strip{display:none!important}}
+        @media(min-width:821px) and (max-width:1040px){body.home-page .animated-hero{min-height:0!important;padding-top:0!important;padding-bottom:18px!important;overflow:hidden!important}body.home-page .hero-slider,body.home-page .hero-slider .slide,body.home-page .hero-slider .slide-1{height:370px!important;min-height:370px!important;overflow:visible!important}body.home-page .hero-category-wrapper{display:block!important;width:calc(100vw - 64px)!important;max-width:960px!important;margin:18px auto 0!important;padding:0!important}body.home-page .gz-hero-lower{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,280px)!important;gap:14px!important;width:100%!important;max-width:none!important;margin:0!important;align-items:stretch!important}body.home-page .gz-stats-strip{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;height:70px!important;min-height:70px!important;padding:9px 12px!important}body.home-page .gz-stats-strip>div{grid-template-columns:24px minmax(0,auto)!important;column-gap:8px!important;min-width:0!important}body.home-page .gz-stats-strip strong{font-size:.95rem!important;line-height:1!important}body.home-page .gz-stats-strip span{font-size:.58rem!important;line-height:1.05!important}body.home-page .gz-coupon-card{display:grid!important;grid-template-columns:24px minmax(0,1fr) 62px!important;gap:9px!important;min-width:0!important;max-width:280px!important;min-height:70px!important;height:70px!important;padding:9px 10px!important;justify-self:stretch!important}body.home-page .gz-coupon-card strong{font-size:.78rem!important;line-height:1.08!important;white-space:normal!important}body.home-page .gz-coupon-card span{font-size:.6rem!important;line-height:1.05!important}body.home-page .gz-coupon-card code{padding:7px 8px!important;font-size:.62rem!important;text-align:center!important;white-space:nowrap!important}body.home-page .mobile-proof-strip{display:none!important}body.home-page #trendingSection.hot-deals{padding-top:18px!important}}
     </style>
     <style id="home-phone-background-space-fix">
         @media(max-width:640px){body.home-page .animated-hero{min-height:320px!important;background:linear-gradient(180deg,rgba(2,7,18,.08) 0%,rgba(2,7,18,.48) 62%,#020712 100%),url('/assets/images/ott-tile-bg-ai-blue-optimized.webp') 64% top/auto 100% no-repeat,#020712!important}body.home-page .hero-slider,body.home-page .hero-slider .slide,body.home-page .hero-slider .slide-1{height:320px!important;min-height:320px!important}body.home-page .hero-slider .slide-1 .slide-graphic,body.home-page .slide-graphic{display:block!important;opacity:.32!important;visibility:visible!important;background:url('/assets/images/ott-tile-bg-ai-blue-optimized.webp') 66% top/auto 100% no-repeat!important;filter:brightness(.68) saturate(1.08) contrast(1.03)!important;mask-image:linear-gradient(to right,rgba(0,0,0,.08) 0%,rgba(0,0,0,.46) 42%,black 100%)!important;-webkit-mask-image:linear-gradient(to right,rgba(0,0,0,.08) 0%,rgba(0,0,0,.46) 42%,black 100%)!important}body.home-page .hot-deals{padding-top:20px!important}body.home-page .slide-content{padding-top:18px!important}}
+        /* Gap fix: tighten hero + top-deals spacing on tablet/mid widths */
+        @media(min-width:821px) and (max-width:1040px){body.home-page .animated-hero{min-height:0!important;padding-bottom:18px!important}body.home-page #trendingSection.hot-deals{padding-top:18px!important}}
     </style>
+    <!-- Layout stability reservation: locks section heights so deferred CSS can't shift spacing.
+         Critical inline rules win over deferred stylesheets via source order + !important. -->
+    <style id="layout-stability-reservation">
+        /* Reserve vertical space for offscreen sections so they don't pop in. */
+        body.home-page .shop-by-category,
+        body.home-page .reviews-section,
+        body.home-page .faq-section,
+        body.home-page .trust-section{content-visibility:auto;contain-intrinsic-size:1px 480px}
+        body.home-page #trendingSection.hot-deals{contain-intrinsic-size:1px 620px}
+
+        /* Desktop & wide: lock hero block height (matches post-load layout) */
+        @media(min-width:1041px){
+            body.home-page .animated-hero{min-height:680px!important}
+            body.home-page .hero-category-wrapper{min-height:96px!important}
+            body.home-page .gz-stats-strip,body.home-page .gz-coupon-card{min-height:72px!important}
+            body.home-page #trendingSection.hot-deals{padding-top:24px!important;min-height:480px!important}
+        }
+        /* Tablet/mid (the band where the gap kept returning) */
+        @media(min-width:821px) and (max-width:1040px){
+            body.home-page .animated-hero{min-height:480px!important;padding-bottom:18px!important}
+            body.home-page .hero-category-wrapper{min-height:88px!important}
+            body.home-page #trendingSection.hot-deals{padding-top:18px!important;min-height:480px!important}
+        }
+        /* Small tablet */
+        @media(min-width:521px) and (max-width:820px){
+            body.home-page .animated-hero{min-height:460px!important}
+            body.home-page .mobile-proof-strip{min-height:76px!important}
+            body.home-page #trendingSection.hot-deals{min-height:520px!important}
+        }
+        /* Phone */
+        @media(max-width:520px){
+            body.home-page .animated-hero{min-height:432px!important}
+            body.home-page .mobile-proof-strip{min-height:108px!important}
+            body.home-page #trendingSection.hot-deals{min-height:640px!important}
+        }
+    </style>
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon-96x96.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
@@ -342,6 +385,8 @@
         body.home-page .performance-badge span{color:rgba(226,232,240,.82)!important}
         @media(min-width:901px){body.home-page .shop-by-category>.container{position:relative!important}body.home-page .category-cards-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:16px!important;margin-right:0!important}body.home-page .category-card{min-height:112px!important;padding:22px 16px!important;text-align:left!important}body.home-page .gz-help-card{position:static!important;width:min(100%,360px)!important;margin:24px 0 0 auto!important}}
     </style>
+    <script src="/js/upgrades.js?v=20260628-ui1" defer></script>
+<script>window.__GO_DEFERRED_SHEETS=["/css/responsive-sweep.css?v=20260628-r3", "/css/upgrades.css?v=20260628-ui1"];</script><script>(function(){var d=document.documentElement;var sheets=window.__GO_DEFERRED_SHEETS||[];var total=sheets.length;var done=0;function ready(){if(!d.classList.contains("css-ready"))d.classList.add("css-ready")}function tick(){if(++done>=total){if(document.fonts&&document.fonts.ready){document.fonts.ready.then(ready)}else{ready()}}}function load(href){var l=document.createElement("link");l.rel="stylesheet";l.href=href;l.onload=l.onerror=tick;document.head.appendChild(l)}if(!total){ready()}else{(window.requestIdleCallback||function(f){setTimeout(f,1)})(function(){sheets.forEach(load)})}setTimeout(function(){if(!d.classList.contains("css-ready"))d.classList.add("fouc-timeout")},1500);})();</script>
 </head>
 <body class="home-page critical-first-paint">
     <noscript>
